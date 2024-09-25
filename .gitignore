@@ -1,0 +1,7 @@
+.clangd
+main
+build
+.vscode
+.cache
+.clang-tidy
+CodeSamples
