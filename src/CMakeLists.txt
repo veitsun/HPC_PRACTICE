@@ -7,3 +7,5 @@ set(HELLOlib_src ${HELLOlib_src_cpp} ${HELLOlib_src_cu})
 
 # Create a static library from the collected source files
 add_library(SUNWEI_src SHARED  ${HELLOlib_src})
+
+target_link_libraries(SUNWEI_src PRIVATE )
