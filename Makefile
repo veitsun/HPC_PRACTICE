@@ -40,7 +40,10 @@ play: config build
 runmain:
 	@./build/main
 
-runmatrixmul:
-	@./build/MatrixMul
+runmatrixMul:
+	@./build/matrixMul
+
+runaddNum:
+	@./build/addNum
 
 .PHONY: all config build clean rebuild

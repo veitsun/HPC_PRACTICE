@@ -4,8 +4,21 @@ file(GLOB HELLOlib_src_cu ${PROJECT_SOURCE_DIR}/src/*.cu)
 
 # Combine both lists into HELLOlib_src
 set(HELLOlib_src ${HELLOlib_src_cpp} ${HELLOlib_src_cu})
+# 查找 CUDA 包
+find_package(CUDA REQUIRED)
 
-# Create a static library from the collected source files
 add_library(SUNWEI_src SHARED  ${HELLOlib_src})
+# 指定目标的包含目录
+target_include_directories(SUNWEI_src
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    PRIVATE
+        ${CUDA_INCLUDE_DIRS}  
+)
 
-target_link_libraries(SUNWEI_src PRIVATE )
+# 链接 CUDA 库和其他必要的库
+target_link_libraries(SUNWEI_src 
+    PUBLIC 
+        ${CUDA_LIBRARIES}
+)
+

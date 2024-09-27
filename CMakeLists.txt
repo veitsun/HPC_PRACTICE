@@ -35,7 +35,8 @@ endmacro()
 # 调用宏
 add_multiple_executables(
   main
-  MatrixMul
+  matrixMul
+  addNum
 )
 
 
