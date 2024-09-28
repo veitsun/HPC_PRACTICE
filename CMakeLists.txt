@@ -36,6 +36,8 @@ endmacro()
 add_multiple_executables(
   main
   matrixMul
+  MulMatrixByCublas
+  MulMatrixOnDevice
 )
 
 

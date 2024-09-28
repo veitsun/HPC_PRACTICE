@@ -46,4 +46,10 @@ runmatrixMul:
 runaddNum:
 	@./build/addNum
 
+runMulMatrixByCublas:
+	@./build/MulMatrixByCublas
+
+runMulMatrixOnDevice:
+	@./build/MulMatrixOnDevice
+
 .PHONY: all config build clean rebuild
