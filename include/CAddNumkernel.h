@@ -7,7 +7,7 @@ using namespace std;
 
 #define DX 100
 
-class CTest {
+class CAddNumkernel {
 public:
   int *a;
   int *b;

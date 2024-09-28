@@ -1,6 +1,6 @@
-#include "../include/CTest.h"
+#include "../include/CAddNumkernel.h"
 
-void CTest::setParameter() {
+void CAddNumkernel::setParameter() {
   cudaMallocManaged(&a, sizeof(int) * DX);
   cudaMallocManaged(&b, sizeof(int) * DX);
   cudaMallocManaged(&c, sizeof(int) * DX);
@@ -11,9 +11,10 @@ void CTest::setParameter() {
   }
 }
 
-void CTest::addNum() { AddKernel(a, b, c, DX); }
+// 这个成员函数调用了一个函数，这个函数里面调用了内核函数
+void CAddNumkernel::addNum() { AddKernel(a, b, c, DX); }
 
-void CTest::show() {
+void CAddNumkernel::show() {
   cout << " a     b    c" << endl;
 
   for (int f = 0; f < DX; f++) {
@@ -21,7 +22,7 @@ void CTest::show() {
   }
 }
 
-void CTest::evolution() {
+void CAddNumkernel::evolution() {
   setParameter();
   addNum();
   show();

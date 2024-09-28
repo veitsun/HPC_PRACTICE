@@ -36,7 +36,6 @@ endmacro()
 add_multiple_executables(
   main
   matrixMul
-  addNum
 )
 
 
