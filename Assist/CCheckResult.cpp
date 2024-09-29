@@ -21,3 +21,20 @@ void CCheckResult::checkResult(float *hostRef, float *gpuRef, const int N) {
 
   return;
 }
+
+void CCheckResult::compare(float *hostC, float *serialC, int M, int N) {
+  float error = 0;
+  bool tmp = true;
+  for (int i = 0; i < M * N; i++) {
+    error = fmax(error, fabs(hostC[i] - serialC[i]));
+    if (error > 1e-5) {
+      tmp = false;
+      printf("error:hostC[%d] = %.3f, serialC[%d] = %.3f\n", i, hostC[i], i,
+             serialC[i]);
+      break;
+    }
+  }
+  if (tmp) {
+    printf("GPU output all right\n");
+  }
+}

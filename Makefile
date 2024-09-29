@@ -52,4 +52,10 @@ runMulMatrixByCublas:
 runMulMatrixOnDevice:
 	@./build/MulMatrixOnDevice
 
+runMulMatrixOnDeviceOptBySharedMem:
+	@./build/MulMatrixOnDeviceOptBySharedMem
+
+runMulMatrixOnDeviceOptBySharedMemAndRegister:
+	@./build/MulMatrixOnDeviceOptBySharedMemAndRegister
+
 .PHONY: all config build clean rebuild

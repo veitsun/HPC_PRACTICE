@@ -35,9 +35,10 @@ endmacro()
 # 调用宏
 add_multiple_executables(
   main
-  matrixMul
   MulMatrixByCublas
   MulMatrixOnDevice
+  MulMatrixOnDeviceOptBySharedMem
+  MulMatrixOnDeviceOptBySharedMemAndRegister
 )
 
 

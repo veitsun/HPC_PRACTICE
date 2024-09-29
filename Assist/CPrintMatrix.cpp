@@ -8,7 +8,8 @@ void CPrintMatrix::print(float *A, int N) {
   printf("\n");
 }
 
-void CPrintMatrix::printMatrix(float *matrix, int size, int nx, int ny) {
+void CPrintMatrix::printMatrix(float *matrix, int nx, int ny) {
+  int size = nx * ny;
   printf("Matrix: \n");
   float *A = matrix;
   for (int i = 0; i < size; i++) {
@@ -19,4 +20,11 @@ void CPrintMatrix::printMatrix(float *matrix, int size, int nx, int ny) {
     }
   }
   printf("\n\n");
+}
+
+void CPrintMatrix::printMatrixABC(float *A, float *B, float *C, int nx,
+                                  int ny) {
+  printMatrix(A, nx, ny);
+  printMatrix(B, nx, ny);
+  printMatrix(C, nx, ny);
 }

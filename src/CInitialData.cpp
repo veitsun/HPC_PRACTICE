@@ -15,13 +15,33 @@ void CInitialData::initialData(float *ip, int size) {
   return;
 }
 
+void CInitialData::initialDataxy(float *ip, int nx, int ny) {
+  int size = nx * ny;
+  // generate different seed for random number
+  time_t t;
+  srand((unsigned)time(&t));
+
+  for (int i = 0; i < size; i++) {
+    ip[i] = (float)(rand() & 0xFF) / 10.0f;
+  }
+
+  return;
+}
+
+void CInitialData::initialDataABC(float *A, float *B, float *C, int nx,
+                                  int ny) {
+  int elemNum = nx * ny;
+  initialData(A, elemNum);
+  initialData(B, elemNum);
+  initialData(C, elemNum);
+}
+
 void CInitialData::initialMatrixGemmData(CMulMatrixGemm girl) {
   // 这里的代码有问题，还没有进行更改
   int elemNum = girl.getSumSize();
   float *deviceA;
   float *deviceB;
   float *deviceC;
-
   cudaMalloc((float **)&deviceA, elemNum * sizeof(float));
   cudaMalloc((float **)&deviceB, elemNum * sizeof(float));
   cudaMalloc((float **)&deviceC, elemNum * sizeof(float));

@@ -1,6 +1,4 @@
 #include "include/CInitialData.h"
-// #include "include/CPrintMatrix.h"
-#include "include/CPrintMatrix.h"
 #include "include/Num.h"
 #include "include/common.h"
 #include <cstdio>
@@ -8,18 +6,39 @@
 #include <cstring>
 #include <ctime>
 #include <cublas_v2.h>
-// #include <iostream>
 using namespace std;
 
-__global__ void MulMatrixOnDevice(int M, int N, int K, float alpha, float *A,
-                                  float *B, float beta, float *C) {
+template <int BLOCK_DIM>
+__global__ void MulMatrixOnDeviceOptBySharedMem(int M, int N, int K,
+                                                float alpha, float *A, float *B,
+                                                float beta, float *C) {
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
-  if (row < M && col < N) {
-    float temp = 0.0;
-    for (int k = 0; k < K; k++) {
-      temp += A[row * K + k] * B[k * N + col];
+  float temp = 0.0;
+  __shared__ float SA[BLOCK_DIM][BLOCK_DIM];
+  __shared__ float SB[BLOCK_DIM][BLOCK_DIM];
+  int width = (K + BLOCK_DIM - 1) / BLOCK_DIM;
+
+  for (int ph = 0; ph < width; ph++) {
+    if (row < M && threadIdx.y + ph * BLOCK_DIM < K) {
+      SA[threadIdx.x][threadIdx.y] = A[row * K + threadIdx.y + ph * BLOCK_DIM];
+    } else {
+      SA[threadIdx.x][threadIdx.y] = 0.0f;
     }
+    if (col < N && threadIdx.x + ph * BLOCK_DIM < K) {
+      SB[threadIdx.x][threadIdx.y] =
+          B[(threadIdx.x + ph * BLOCK_DIM) * N + col];
+    } else {
+      SB[threadIdx.x][threadIdx.y] = 0.0f;
+    }
+  }
+  __syncthreads();
+  for (int s = 0; s < BLOCK_DIM; s++) {
+    temp += SA[threadIdx.x][s] * SB[s][threadIdx.y];
+  }
+  __syncthreads();
+
+  if (row < M && col < N) {
     C[row * N + col] = alpha * temp + beta * C[row * N + col];
   }
 }
@@ -29,16 +48,16 @@ int main(int argc, char **argv) {
   float *hostB;
   float *hostC;
   float *gpuRef;
-
   float alpha = 1.0;
   float beta = 1.0;
+
+  int elemNum = nx * ny;
 
   // 给主机上的三个矩阵分配内存
   hostA = (float *)malloc(elemNum * sizeof(float));
   hostB = (float *)malloc(elemNum * sizeof(float));
   hostC = (float *)malloc(elemNum * sizeof(float));
   gpuRef = (float *)malloc(elemNum * sizeof(float));
-
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
   cinitialData.initialDataABC(hostA, hostB, hostC, nx, ny);
@@ -73,14 +92,14 @@ int main(int argc, char **argv) {
   CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
                    cudaMemcpyHostToDevice));
   cudaEventRecord(start, 0);
-  MulMatrixOnDevice<<<gridDim, blockDim>>>(nx, nx, nx, alpha, deviceA, deviceB,
-                                           beta, deviceC);
+  MulMatrixOnDeviceOptBySharedMem<16><<<gridDim, blockDim>>>(
+      nx, nx, nx, alpha, deviceA, deviceB, beta, deviceC);
 
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
 
   cudaEventElapsedTime(&time, start, stop);
-  printf("MulMatrixOnDevice Time elapsed %f sec\n", time);
+  printf("MulMatrixOnDeviceOptBySharedMem Time elapsed %f sec\n", time);
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
 
@@ -95,5 +114,6 @@ int main(int argc, char **argv) {
   free(hostB);
   free(hostC);
   free(gpuRef);
+
   return 0;
 }

@@ -53,7 +53,6 @@ int main(int argc, char **argv) {
   float *cublasRef;
   float alpha = 1.0;
   float beta = 1.0;
-  int elemNum = nx * ny;
   // 给主机上的三个矩阵分配内存
   hostA = (float *)malloc(elemNum * sizeof(float));
   hostB = (float *)malloc(elemNum * sizeof(float));
@@ -61,16 +60,11 @@ int main(int argc, char **argv) {
   cublasRef = (float *)malloc(elemNum * sizeof(float));
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
-  cinitialData.initialData(hostA, elemNum);
-  cinitialData.initialData(hostB, elemNum);
-  cinitialData.initialData(hostC, elemNum);
+  cinitialData.initialDataABC(hostA, hostB, hostC, nx, ny);
   memset(cublasRef, 0, elemNum * sizeof(float));
-  // 测试主机上的三个矩阵是否已经被初始化数据
   // cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
   // CPrintMatrix cprintmatrix;
-  // cprintmatrix.printMatrix(hostA, elemNum, nx, ny);
-  // cprintmatrix.printMatrix(hostB, elemNum, nx, ny);
-  // cprintmatrix.printMatrix(hostC, elemNum, nx, ny);
+  // cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
   // -----------------------------------------------------------------------------------------
   cout << "使用cublas 执行矩阵乘法" << endl;
   // 使用cublas 执行矩阵乘法
@@ -87,10 +81,6 @@ int main(int argc, char **argv) {
   }
   matMult_cublas(nx, nx, nx, alpha, hostA, hostB, beta, hostC, cuHandle,
                  cublasRef, elemNum);
-  // 善后
-  // printMatrix(hostA, elemNum, nx, ny);
-  // printMatrix(hostB, elemNum, nx, ny);
-  // printMatrix(hostC, elemNum, nx, ny);
   cublasDestroy(cuHandle);
   free(hostA);
   free(hostB);
