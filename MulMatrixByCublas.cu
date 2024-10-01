@@ -1,5 +1,6 @@
+#include "include/CGemmWithC.h"
 #include "include/CInitialData.h"
-// #include "include/CPrintMatrix.h"
+#include "include/CPrintMatrix.h"
 #include "include/Num.h"
 #include "include/common.h"
 #include <cstdio>
@@ -12,7 +13,7 @@ using namespace std;
 // ---------------------------------------------------------------------------cublas
 void matMult_cublas(int M, int N, int K, float alpha, float *A, float *B,
                     float beta, float *C, cublasHandle_t cuHandle,
-                    float *cublasRef, const int elemNum) {
+                    float *cublasRef) {
   float *cublasdeviceA;
   float *cublasdeviceB;
   float *cublasdeviceC;
@@ -29,15 +30,13 @@ void matMult_cublas(int M, int N, int K, float alpha, float *A, float *B,
   cublasSetVector(elemNum, sizeof(float), B, 1, cublasdeviceB, 1);
   cublasSetVector(elemNum, sizeof(float), C, 1, cublasdeviceC, 1);
   // 传递矩阵相乘中的参数，并执行内核函数，矩阵相乘
-  float a = 1;
-  float b = 0;
   cudaEventRecord(start, 0);
-  cublasSgemm(cuHandle, CUBLAS_OP_T, CUBLAS_OP_T, M, K, N, &a, cublasdeviceA, N,
-              cublasdeviceB, K, &b, cublasdeviceC, M);
+  cublasSgemm(cuHandle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha,
+              cublasdeviceA, N, cublasdeviceB, K, &beta, cublasdeviceC, M);
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&time, start, stop);
-  printf("matMult_cublas Time elapsed %f sec\n", time);
+  printf("matMult_cublas Time elapsed %f ms\n", time);
   cublasGetVector(elemNum, sizeof(float), cublasdeviceC, 1, cublasRef, 1);
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
@@ -62,9 +61,11 @@ int main(int argc, char **argv) {
   CInitialData cinitialData;
   cinitialData.initialDataABC(hostA, hostB, hostC, nx, ny);
   memset(cublasRef, 0, elemNum * sizeof(float));
+
   // cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
-  // CPrintMatrix cprintmatrix;
-  // cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
+  CPrintMatrix cprintmatrix;
+  // cprintmatrix.printMatrix(hostC, nx, ny);
+  cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
   // -----------------------------------------------------------------------------------------
   cout << "使用cublas 执行矩阵乘法" << endl;
   // 使用cublas 执行矩阵乘法
@@ -79,9 +80,16 @@ int main(int argc, char **argv) {
     getchar();
     return EXIT_FAILURE;
   }
-  matMult_cublas(nx, nx, nx, alpha, hostA, hostB, beta, hostC, cuHandle,
-                 cublasRef, elemNum);
+  matMult_cublas(n, n, n, alpha, hostA, hostB, beta, hostC, cuHandle,
+                 cublasRef);
   cublasDestroy(cuHandle);
+  // -----------------------------------------------------------------
+  // cprintmatrix.printMatrixCinFile(cublasRef, nx, ny);
+  CGemmWithC girl;
+  girl.solveProblem(M, N, K, alpha, hostA, hostB, beta, hostC);
+  cprintmatrix.printMatrix(cublasRef, nx, ny);
+  cprintmatrix.printMatrix(hostC, nx, ny);
+
   free(hostA);
   free(hostB);
   free(hostC);

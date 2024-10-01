@@ -5,7 +5,9 @@ class CGemmWithC {
 private:
 public:
   void solveProblem(int M, int N, int K, float alpha, float *A, float *B,
-                    float beta, float *C, float *hostRef);
+                    float beta, float *C);
+  void solveProblemHostRef(int M, int N, int K, float alpha, float *A, float *B,
+                           float beta, float *C, float *hostRef);
 };
 
 #endif

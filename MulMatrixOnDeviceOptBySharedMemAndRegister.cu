@@ -178,10 +178,10 @@ void hostMatrix(float *hostA, float *hostB, float *hostC, int M, int K, int N) {
   int repeat = 20;
   // matrixKernel1st<BM, BN, BK, TM, TN><<<grid_dim, block_dim>>>(dA, dB, dC, M,
   // K, N);
-  matrixKernel2nd<BM, BN, BK, TM, TN>
+  // matrixKernel2nd<BM, BN, BK, TM, TN>
+  //     <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
+  matrixOrigin<BM, BN, BK, TM, TN>
       <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
-  // matrixOrigin<BM, BN, BK, TM, TN><<<grid_dim, block_dim>>>(dA, dB, dC, M, K,
-  // N);
   cudaEvent_t start, stop;
   float ker_time = 0;
   cudaEventCreate(&start);

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 set(CMAKE_CUDA_ARCHITECTURES "native")
 project(HPC_SHAREDCODE CXX CUDA)
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
@@ -29,6 +30,9 @@ macro(add_multiple_executables)
     foreach(executable_name ${ARGN})
         add_executable(${executable_name} ${executable_name}.cu)
         target_link_libraries(${executable_name} PRIVATE SUNWEI_src SUNWEI_Assit ${CUBLAS_LIBRARY})
+        # 设置nvcc编译器参数
+        target_compile_options(${executable_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xptxas -v>)
+
     endforeach()
 endmacro()
 
@@ -36,6 +40,7 @@ endmacro()
 add_multiple_executables(
   main
   MulMatrixByCublas
+  MulMatrixNative
   MulMatrixOnDevice
   MulMatrixOnDeviceOptBySharedMem
   MulMatrixOnDeviceOptBySharedMemAndRegister

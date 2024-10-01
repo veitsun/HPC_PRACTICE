@@ -8,6 +8,7 @@ public:
   void initialDataxy(float *ip, int nx, int ny);
   void initialDataABC(float *A, float *B, float *C, int nx, int ny);
   void initialMatrixGemmData(CMulMatrixGemm girl);
+  void initialDataABCByFile(float *A, float *B, float *C, int nx, int ny);
 };
 
 #endif

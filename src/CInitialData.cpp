@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
+#include <iostream>
 void CInitialData::initialData(float *ip, int size) {
   // generate different seed for random number
   time_t t;
@@ -34,6 +36,31 @@ void CInitialData::initialDataABC(float *A, float *B, float *C, int nx,
   initialData(A, elemNum);
   initialData(B, elemNum);
   initialData(C, elemNum);
+}
+
+void CInitialData::initialDataABCByFile(float *A, float *B, float *C, int nx,
+                                        int ny) {
+  const char *FILENAME = "random_numbers.txt"; // 文件名
+  const int MAX_NUMBERS = nx * ny;
+  std::ifstream inputFile(FILENAME);
+  if (!inputFile.is_open()) {
+    std::cerr << "无法打开文件 " << FILENAME << std::endl;
+    return;
+  }
+  int count = 0;
+  float number;
+  while (inputFile >> number && count < MAX_NUMBERS) {
+    *(A + count) = number;
+    *(B + count) = number;
+    *(C + count) = number;
+    count++;
+  }
+  inputFile.close();
+
+  // initialData(A, elemNum);
+  // initialData(B, elemNum);
+  // initialData(C, elemNum);
+  // std::ifstream fin("file")
 }
 
 void CInitialData::initialMatrixGemmData(CMulMatrixGemm girl) {

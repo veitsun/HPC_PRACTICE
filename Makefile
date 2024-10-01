@@ -52,6 +52,9 @@ runMulMatrixByCublas:
 runMulMatrixOnDevice:
 	@./build/MulMatrixOnDevice
 
+runMulMatrixNative:
+	@./build/MulMatrixNative
+
 runMulMatrixOnDeviceOptBySharedMem:
 	@./build/MulMatrixOnDeviceOptBySharedMem
 

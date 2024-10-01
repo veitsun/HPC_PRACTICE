@@ -1,6 +1,5 @@
 #include "include/CInitialData.h"
 // #include "include/CPrintMatrix.h"
-#include "include/CPrintMatrix.h"
 #include "include/Num.h"
 #include "include/common.h"
 #include <cstdio>
@@ -57,7 +56,7 @@ int main(int argc, char **argv) {
 
   // -----------------------------------------------------------------------------------------
   // 使用cuda kernel 来执行矩阵乘法
-  dim3 blockDim(16, 16);
+  dim3 blockDim(BLOCK_DIM_x, BLOCK_DIM_y);
   dim3 gridDim((ny + blockDim.x - 1) / blockDim.x,
                (nx + blockDim.y - 1) / blockDim.y);
   float *deviceA;
@@ -80,7 +79,7 @@ int main(int argc, char **argv) {
   cudaEventSynchronize(stop);
 
   cudaEventElapsedTime(&time, start, stop);
-  printf("MulMatrixOnDevice Time elapsed %f sec\n", time);
+  printf("MulMatrixOnDevice Time elapsed %f ms\n", time);
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
 
