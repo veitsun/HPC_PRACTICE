@@ -1,4 +1,3 @@
-#include "include/CGemmWithC.h"
 #include "include/CInitialData.h"
 #include "include/CPrintMatrix.h"
 #include "include/Num.h"
