@@ -2,6 +2,7 @@
 #include "include/CPrintMatrix.h"
 #include "include/Num.h"
 #include "include/common.h"
+// #include <__clang_cuda_builtin_vars.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -13,31 +14,32 @@ template <int BLOCK_DIM>
 __global__ void MulMatrixOnDeviceOptBySharedMem(int M, int N, int K,
                                                 float alpha, float *A, float *B,
                                                 float beta, float *C) {
-  int row = blockIdx.y * blockDim.y + threadIdx.y;
-  int col = blockIdx.x * blockDim.x + threadIdx.x;
-  float temp = 0.0;
-  __shared__ float SA[BLOCK_DIM][BLOCK_DIM];
-  __shared__ float SB[BLOCK_DIM][BLOCK_DIM];
+  int row = blockIdx.y * blockIdx.y + threadIdx.y;
+  int col = blockIdx.x * blockIdx.x + threadIdx.x;
+  float temp = 0.0f;
+  __shared__ float sharedA[BLOCK_DIM][BLOCK_DIM];
+  __shared__ float sharedB[BLOCK_DIM][BLOCK_DIM];
   int width = (K + BLOCK_DIM - 1) / BLOCK_DIM;
 
   for (int ph = 0; ph < width; ph++) {
     if (row < M && threadIdx.y + ph * BLOCK_DIM < K) {
-      SA[threadIdx.x][threadIdx.y] = A[row * K + threadIdx.y + ph * BLOCK_DIM];
+      sharedA[threadIdx.y][threadIdx.x] =
+          A[row * K + threadIdx.x + ph * BLOCK_DIM];
     } else {
-      SA[threadIdx.x][threadIdx.y] = 0.0f;
+      sharedA[threadIdx.y][threadIdx.x] = 0.0f;
     }
     if (col < N && threadIdx.x + ph * BLOCK_DIM < K) {
-      SB[threadIdx.x][threadIdx.y] =
-          B[(threadIdx.x + ph * BLOCK_DIM) * N + col];
+      sharedB[threadIdx.y][threadIdx.x] =
+          B[(threadIdx.y + ph * BLOCK_DIM) * N + col];
     } else {
-      SB[threadIdx.x][threadIdx.y] = 0.0f;
+      sharedB[threadIdx.y][threadIdx.x] = 0.0f;
     }
+    __syncthreads();
+    for (int s = 0; s < BLOCK_DIM; s++) {
+      temp += sharedA[threadIdx.y][s] * sharedB[s][threadIdx.x];
+    }
+    __syncthreads();
   }
-  __syncthreads();
-  for (int s = 0; s < BLOCK_DIM; s++) {
-    temp += SA[threadIdx.x][s] * SB[s][threadIdx.y];
-  }
-  __syncthreads();
 
   if (row < M && col < N) {
     C[row * N + col] = alpha * temp + beta * C[row * N + col];
@@ -52,8 +54,6 @@ int main(int argc, char **argv) {
   float alpha = 1.0;
   float beta = 1.0;
 
-  int elemNum = nx * ny;
-
   // 给主机上的三个矩阵分配内存
   hostA = (float *)malloc(elemNum * sizeof(float));
   hostB = (float *)malloc(elemNum * sizeof(float));
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 
   // cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
   CPrintMatrix cprintmatrix;
-  // cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
+  cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
 
   // -------------------------------------------------------------------------------------GPU计时
 
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
   CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
                    cudaMemcpyHostToDevice));
   cudaEventRecord(start, 0);
-  MulMatrixOnDeviceOptBySharedMem<16><<<gridDim, blockDim>>>(
+  MulMatrixOnDeviceOptBySharedMem<32><<<gridDim, blockDim>>>(
       nx, nx, nx, alpha, deviceA, deviceB, beta, deviceC);
 
   cudaEventRecord(stop, 0);

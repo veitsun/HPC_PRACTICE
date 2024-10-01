@@ -44,6 +44,7 @@ add_multiple_executables(
   MulMatrixOnDevice
   MulMatrixOnDeviceOptBySharedMem
   MulMatrixOnDeviceOptBySharedMemAndRegister
+  test
 )
 
 

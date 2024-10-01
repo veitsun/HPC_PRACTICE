@@ -61,4 +61,7 @@ runMulMatrixOnDeviceOptBySharedMem:
 runMulMatrixOnDeviceOptBySharedMemAndRegister:
 	@./build/MulMatrixOnDeviceOptBySharedMemAndRegister
 
+runtest:
+	@./build/test
+
 .PHONY: all config build clean rebuild
