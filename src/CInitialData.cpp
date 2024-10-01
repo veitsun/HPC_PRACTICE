@@ -56,11 +56,6 @@ void CInitialData::initialDataABCByFile(float *A, float *B, float *C, int nx,
     count++;
   }
   inputFile.close();
-
-  // initialData(A, elemNum);
-  // initialData(B, elemNum);
-  // initialData(C, elemNum);
-  // std::ifstream fin("file")
 }
 
 void CInitialData::initialMatrixGemmData(CMulMatrixGemm girl) {

@@ -27,15 +27,15 @@ int main(int argc, char **argv) {
 
   cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
   CPrintMatrix cprintmatrix;
-  cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
+  // cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
 
   // -----------------------------------------------------------------
 
   CGemmWithC girl;
   girl.solveProblem(M, N, K, alpha, hostA, hostB, beta, hostC);
-  std::cout << "C矩阵:" << std::endl;
   cprintmatrix.printMatrixCinFile(hostC, nx, ny);
-  cprintmatrix.printMatrix(hostC, nx, ny);
+  // std::cout << "C矩阵:" << std::endl;
+  // cprintmatrix.printMatrix(hostC, nx, ny);
 
   free(hostA);
   free(hostB);

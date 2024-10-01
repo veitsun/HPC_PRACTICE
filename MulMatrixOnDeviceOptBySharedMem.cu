@@ -1,4 +1,5 @@
 #include "include/CInitialData.h"
+#include "include/CPrintMatrix.h"
 #include "include/Num.h"
 #include "include/common.h"
 #include <cstdio>
@@ -60,11 +61,11 @@ int main(int argc, char **argv) {
   gpuRef = (float *)malloc(elemNum * sizeof(float));
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
-  cinitialData.initialDataABC(hostA, hostB, hostC, nx, ny);
+  cinitialData.initialDataABCByFile(hostA, hostB, hostC, nx, ny);
   memset(gpuRef, 0, elemNum * sizeof(float));
 
   // cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
-  // CPrintMatrix cprintmatrix;
+  CPrintMatrix cprintmatrix;
   // cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
 
   // -------------------------------------------------------------------------------------GPU计时
@@ -106,6 +107,7 @@ int main(int argc, char **argv) {
   CHECK(cudaMemcpy(gpuRef, deviceC, elemNum * sizeof(float),
                    cudaMemcpyDeviceToHost));
   CHECK(cudaDeviceSynchronize());
+  cprintmatrix.printMatrixCinFile(gpuRef, nx, ny);
   // -----------------------------------------------------------------------------------------
   CHECK(cudaFree(deviceA));
   CHECK(cudaFree(deviceB));

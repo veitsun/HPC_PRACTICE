@@ -5,3 +5,5 @@ build
 .cache
 .clang-tidy
 CodeSamples
+fileoutput.txt
+random_numbers.txt
