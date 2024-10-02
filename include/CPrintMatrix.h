@@ -8,6 +8,7 @@ public:
   void printMatrix(float *matrix, int nx, int ny);
   void printMatrixABC(float *A, float *B, float *C, int nx, int ny);
   void printMatrixCinFile(float *C, int nx, int ny);
+  void printMatrixCinFileClear(float *C, int nx, int ny);
 };
 
 #endif
