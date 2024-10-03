@@ -1,3 +1,4 @@
+#include "CPrintMatrix.h"
 #include "include/CInitialData.h"
 #include "include/Num.h"
 #include "include/common.h"
@@ -13,19 +14,6 @@ const int TN = 4;
 const int BM = TM * BLOCK_DIM_x;
 const int BN = TN * BLOCK_DIM_y;
 const int BK = 8;
-
-void matrixSerial(float *hostA, float *hostB, float *hostC, int M, int K,
-                  int N) {
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < N; j++) {
-      float tmp = 0;
-      for (int s = 0; s < K; s++) {
-        tmp += hostA[i * K + s] * hostB[s * N + j];
-      }
-      hostC[i * N + j] = tmp;
-    }
-  }
-}
 
 template <int BM, int BN, int BK, int TM, int TN>
 __global__ void matrixKernel1st(float *dA, float *dB, float *dC, int M, int K,
@@ -176,20 +164,20 @@ void hostMatrix(float *hostA, float *hostB, float *hostC, int M, int K, int N) {
   dim3 block_dim(BLOCK_DIM_x, BLOCK_DIM_y, 1);
   dim3 grid_dim(num_blocks_x, num_blocks_y, 1);
   int repeat = 20;
-  // matrixKernel1st<BM, BN, BK, TM, TN><<<grid_dim, block_dim>>>(dA, dB, dC, M,
-  // K, N);
+  matrixKernel1st<BM, BN, BK, TM, TN>
+      <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
   // matrixKernel2nd<BM, BN, BK, TM, TN>
   //     <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
-  matrixOrigin<BM, BN, BK, TM, TN>
-      <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
+  // matrixOrigin<BM, BN, BK, TM, TN>
+  //     <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
   cudaEvent_t start, stop;
   float ker_time = 0;
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
   cudaEventRecord(start, 0);
   for (int i = 0; i < repeat; i++) {
-    // matrixKernel1st<BM, BN, BK, TM, TN><<<grid_dim, block_dim>>>(dA, dB, dC,
-    // M, K, N);
+    // matrixKernel1st<BM, BN, BK, TM, TN>
+    //     <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
     matrixKernel2nd<BM, BN, BK, TM, TN>
         <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
     // matrixOrigin<BM, BN, BK, TM, TN><<<grid_dim, block_dim>>>(dA, dB, dC, M,
@@ -207,7 +195,8 @@ void hostMatrix(float *hostA, float *hostB, float *hostC, int M, int K, int N) {
   cudaEventElapsedTime(&ker_time, start, stop); // must float ker_time
 
   cudaMemcpy(hostC, dC, M * N * sizeof(float), cudaMemcpyDeviceToHost);
-
+  CPrintMatrix cprintmatrix;
+  cprintmatrix.printMatrixCinFileClear(hostC, nx, ny);
   cudaFree(dA);
   cudaFree(dB);
   cudaFree(dC);

@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   float *gpuRef;
 
   float alpha = 1.0;
-  float beta = 1.0;
+  float beta = 0.0;
 
   // 给主机上的三个矩阵分配内存
   hostA = (float *)malloc(elemNum * sizeof(float));

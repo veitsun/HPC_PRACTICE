@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
   float *hostC;
   float *gpuRef;
   float alpha = 1.0;
-  float beta = 1.0;
+  float beta = 0.0;
 
   // 给主机上的三个矩阵分配内存
   hostA = (float *)malloc(elemNum * sizeof(float));
@@ -64,10 +64,7 @@ int main(int argc, char **argv) {
   cinitialData.initialDataABCByFile(hostA, hostB, hostC, nx, ny);
   memset(gpuRef, 0, elemNum * sizeof(float));
 
-  // cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
   CPrintMatrix cprintmatrix;
-  cprintmatrix.printMatrixABC(hostA, hostB, hostC, nx, ny);
-
   // -------------------------------------------------------------------------------------GPU计时
 
   cudaEvent_t start, stop;
