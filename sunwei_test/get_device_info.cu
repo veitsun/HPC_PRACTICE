@@ -16,6 +16,10 @@ int main() {
   for (int device_id = 0; device_id < deviceCount; ++device_id) {
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, device_id);
+    if (!prop.deviceOverlap) {
+      printf("Your Device will not support speed up from multi-streams\n");
+      return 0;
+    }
 
     std::cout << "Device ID: " << device_id << std::endl;
     std::cout << "Device Name: " << prop.name << std::endl;
