@@ -12,16 +12,16 @@
 
 	// .globl	_Z3addPiS_S_
 
-.visible .entry _Z3addPiS_S_( // 定义了一个对外可见的入口函数，该函数接受三个参数
+.visible .entry _Z3addPiS_S_(
 	.param .u64 _Z3addPiS_S__param_0,
 	.param .u64 _Z3addPiS_S__param_1,
 	.param .u64 _Z3addPiS_S__param_2
 )
 {
-	.reg .b32 	%r<5>; // 申明了5个32位的寄存器
-	.reg .b64 	%rd<11>; // 申明了 11 个64位的寄存器
+	.reg .b32 	%r<5>;
+	.reg .b64 	%rd<11>;
 
- 
+
 	ld.param.u64 	%rd1, [_Z3addPiS_S__param_0];
 	ld.param.u64 	%rd2, [_Z3addPiS_S__param_1];
 	ld.param.u64 	%rd3, [_Z3addPiS_S__param_2];

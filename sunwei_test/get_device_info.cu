@@ -28,8 +28,16 @@ int main() {
     std::cout << "Total Global Memory: " << prop.totalGlobalMem / (1024 * 1024)
               << " MB" << std::endl;
     std::cout << "L2 Cache Size: " << prop.l2CacheSize / 1024 << " KB"
-              << std::endl;
+              << std::endl; // GPU上可用的L2缓存量
     std::cout << "Max Threads per Block: " << prop.maxThreadsPerBlock
+              << std::endl;
+
+    std::cout
+        << "可留存内存访问预留的最大 L2 缓存量:"
+        << prop.persistingL2CacheMaxSize
+        << std::
+               endl; // 这里是0，可能是在某些的GPU架构中，L2缓存的使用方式可能有所不同，例如动态分配而非静态预留。因此为0，不一定意味着无法利用L2缓存来加速数据访问。
+    std::cout << "访问策略窗口的最大大小:" << prop.accessPolicyMaxWindowSize
               << std::endl;
     std::cout << "-------------------------------------" << std::endl;
   }
