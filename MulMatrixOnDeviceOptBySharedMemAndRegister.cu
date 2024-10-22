@@ -1,5 +1,5 @@
-#include "CPrintMatrix.h"
 #include "include/CInitialData.h"
+#include "include/CPrintMatrix.h"
 #include "include/Num.h"
 #include "include/common.h"
 #include <cstdio>
@@ -178,10 +178,10 @@ void hostMatrix(float *hostA, float *hostB, float *hostC, int M, int K, int N) {
   for (int i = 0; i < repeat; i++) {
     // matrixKernel1st<BM, BN, BK, TM, TN>
     //     <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
-    matrixKernel2nd<BM, BN, BK, TM, TN>
+    // matrixKernel2nd<BM, BN, BK, TM, TN>
+    //     <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
+    matrixOrigin<BM, BN, BK, TM, TN>
         <<<grid_dim, block_dim>>>(dA, dB, dC, M, K, N);
-    // matrixOrigin<BM, BN, BK, TM, TN><<<grid_dim, block_dim>>>(dA, dB, dC, M,
-    // K, N);
   }
 
   cudaError_t err = cudaGetLastError();
