@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-const int NUM_RANDOM_NUMBERS = nx * ny;      // 生成随机数的数量
+const int NUM_RANDOM_NUMBERS = n * n;        // 生成随机数的数量
 const char *FILENAME = "random_numbers.txt"; // 文件名
 int main() {
   // generate different seed for random number

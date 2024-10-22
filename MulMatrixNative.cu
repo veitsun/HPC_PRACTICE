@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
   hostC = (float *)malloc(elemNum * sizeof(float));
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
-  cinitialData.initialDataABCByFile(hostA, hostB, hostC, nx, ny);
+  cinitialData.initialDataABCByFile(hostA, hostB, hostC, n, n);
 
   cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
   CPrintMatrix cprintmatrix;
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
   CGemmWithC girl;
   girl.solveProblem(M, N, K, alpha, hostA, hostB, beta, hostC);
-  cprintmatrix.printMatrixCinFile(hostC, nx, ny);
+  cprintmatrix.printMatrixCinFile(hostC, n, n);
   // std::cout << "C矩阵:" << std::endl;
   // cprintmatrix.printMatrix(hostC, nx, ny);
 

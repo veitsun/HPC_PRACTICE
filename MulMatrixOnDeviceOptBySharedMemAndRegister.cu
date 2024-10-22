@@ -196,7 +196,7 @@ void hostMatrix(float *hostA, float *hostB, float *hostC, int M, int K, int N) {
 
   cudaMemcpy(hostC, dC, M * N * sizeof(float), cudaMemcpyDeviceToHost);
   CPrintMatrix cprintmatrix;
-  cprintmatrix.printMatrixCinFileClear(hostC, nx, ny);
+  cprintmatrix.printMatrixCinFileClear(hostC, n, n);
   cudaFree(dA);
   cudaFree(dB);
   cudaFree(dC);
@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
   hostC = (float *)malloc(M * N * sizeof(float));
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
-  cinitialData.initialDataABC(hostA, hostB, hostC, nx, ny);
+  cinitialData.initialDataABC(hostA, hostB, hostC, n, n);
   // -----------------------------------------------------------------------------------------
   hostMatrix(hostA, hostB, hostC, M, K, N);
   free(hostA);

@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
-  cinitialData.initialDataABCByFile(hostA, hostB, hostC, nx, ny);
+  cinitialData.initialDataABCByFile(hostA, hostB, hostC, n, n);
   memset(gpuRef, 0, elemNum * sizeof(float));
   // -------------------------------------------------------------------------------------GPU计时
 
@@ -52,8 +52,8 @@ int main(int argc, char **argv) {
   // -----------------------------------------------------------------------------------------
   // 使用cuda kernel 来执行矩阵乘法
   dim3 blockDim(BLOCK_DIM_x, BLOCK_DIM_y);
-  dim3 gridDim((ny + blockDim.x - 1) / blockDim.x,
-               (nx + blockDim.y - 1) / blockDim.y);
+  dim3 gridDim((n + blockDim.x - 1) / blockDim.x,
+               (n + blockDim.y - 1) / blockDim.y);
   float *deviceA;
   float *deviceB;
   float *deviceC;
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
   CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
                    cudaMemcpyHostToDevice));
   cudaEventRecord(start, 0);
-  MulMatrixOnDevice<<<gridDim, blockDim>>>(nx, nx, nx, alpha, deviceA, deviceB,
+  MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB,
                                            beta, deviceC);
 
   cudaEventRecord(stop, 0);
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
                    cudaMemcpyDeviceToHost));
   CHECK(cudaDeviceSynchronize());
   CPrintMatrix cprintmatrix;
-  cprintmatrix.printMatrixCinFile(gpuRef, nx, ny);
+  cprintmatrix.printMatrixCinFile(gpuRef, n, n);
   // -----------------------------------------------------------------------------------------
   CHECK(cudaFree(deviceA));
   CHECK(cudaFree(deviceB));

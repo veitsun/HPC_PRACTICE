@@ -1,3 +1,5 @@
+./fileoutput.txt
+./random_numbers.txt
 .clangd
 main
 build
@@ -6,5 +8,3 @@ build
 .clang-tidy
 CodeSamples
 .gitignore
-fileoutput.txt
-random_numbers.txt

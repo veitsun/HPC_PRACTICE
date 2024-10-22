@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
   cublasRef = (float *)malloc(elemNum * sizeof(float));
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
-  cinitialData.initialDataABCByFile(hostA, hostB, hostC, nx, ny);
+  cinitialData.initialDataABCByFile(hostA, hostB, hostC, n, n);
   memset(cublasRef, 0, elemNum * sizeof(float));
 
   // cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
   cublasDestroy(cuHandle);
   // -----------------------------------------------------------------
   // cprintmatrix.printMatrixCinFile(cublasRef, nx, ny);
-  cprintmatrix.printMatrixCinFile(cublasRef, nx, ny);
+  cprintmatrix.printMatrixCinFile(cublasRef, n, n);
   // cprintmatrix.printMatrix(hostC, nx, ny);
 
   free(hostA);
