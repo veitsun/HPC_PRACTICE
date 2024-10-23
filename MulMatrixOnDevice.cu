@@ -136,26 +136,26 @@ int main(int argc, char **argv) {
   CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
                    cudaMemcpyHostToDevice));
   int repeat = 20;
-  // // 朴素的矩阵乘法
-  // MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB,
-  //                                          beta, deviceC);
+  // 朴素的矩阵乘法
+  MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB,
+                                           beta, deviceC);
 
-  // 全局内存合并
-  _sgemm_global_mem_coalesce<32>
-      <<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB, beta, deviceC);
+  // // 全局内存合并
+  // _sgemm_global_mem_coalesce<32>
+  //     <<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB, beta,
+  //     deviceC);
 
   cudaEventRecord(start, 0);
   // --------------------------------------------------------------------------------------------kernel
 
   for (int i = 0; i < repeat; i++) {
-    // // 朴素的矩阵乘法
-    // MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA,
-    // deviceB,
-    //                                          beta, deviceC);
+    // 朴素的矩阵乘法
+    MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB,
+                                             beta, deviceC);
 
-    // 全局内存合并
-    _sgemm_global_mem_coalesce<32><<<gridDim, blockDim>>>(
-        n, n, n, alpha, deviceA, deviceB, beta, deviceC);
+    // // 全局内存合并
+    // _sgemm_global_mem_coalesce<32><<<gridDim, blockDim>>>(
+    //     n, n, n, alpha, deviceA, deviceB, beta, deviceC);
   }
   // --------------------------------------------------------------------------------------------kernel
   cudaError_t err = cudaGetLastError();

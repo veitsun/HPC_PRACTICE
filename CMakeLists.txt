@@ -36,7 +36,7 @@ macro(add_multiple_executables)
         add_executable(${executable_name} ${executable_name}.cu)
         target_link_libraries(${executable_name} PRIVATE SUNWEI_src SUNWEI_Assit SUNWEI_kernels ${CUBLAS_LIBRARY})
         # 设置nvcc编译器参数
-        target_compile_options(${executable_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xptxas -v>)
+        # target_compile_options(${executable_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xptxas -v>)
 
     endforeach()
 endmacro()
