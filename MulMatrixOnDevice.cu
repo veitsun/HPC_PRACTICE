@@ -135,7 +135,6 @@ int main(int argc, char **argv) {
                    cudaMemcpyHostToDevice));
   CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
                    cudaMemcpyHostToDevice));
-  cudaEventRecord(start, 0);
   int repeat = 20;
   // // 朴素的矩阵乘法
   // MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB,
@@ -144,6 +143,8 @@ int main(int argc, char **argv) {
   // 全局内存合并
   _sgemm_global_mem_coalesce<32>
       <<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB, beta, deviceC);
+
+  cudaEventRecord(start, 0);
   // --------------------------------------------------------------------------------------------kernel
 
   for (int i = 0; i < repeat; i++) {
