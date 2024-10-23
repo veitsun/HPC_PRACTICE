@@ -1,5 +1,5 @@
-./fileoutput.txt
-./random_numbers.txt
+fileoutput.txt
+random_numbers.txt
 .clangd
 main
 build
