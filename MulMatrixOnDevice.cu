@@ -10,10 +10,11 @@
 // #include <iostream>
 using namespace std;
 
-__global__ void MulMatrixOnDevice(int M, int N, int K, float alpha, float *A,
-                                  float *B, float beta, float *C) {
-  int row = blockIdx.y * blockDim.y + threadIdx.y;
-  int col = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void MulMatrixOnDevice(int M, int N, int K, float alpha,
+                                  const float *A, const float *B, float beta,
+                                  float *C) {
+  const uint row = blockIdx.y * blockDim.y + threadIdx.y;
+  const uint col = blockIdx.x * blockDim.x + threadIdx.x;
   if (row < M && col < N) {
     float temp = 0.0;
     for (int k = 0; k < K; k++) {
@@ -33,15 +34,15 @@ int main(int argc, char **argv) {
   float beta = 0.0;
 
   // 给主机上的三个矩阵分配内存
-  hostA = (float *)malloc(elemNum * sizeof(float));
-  hostB = (float *)malloc(elemNum * sizeof(float));
-  hostC = (float *)malloc(elemNum * sizeof(float));
-  gpuRef = (float *)malloc(elemNum * sizeof(float));
+  hostA = (float *)malloc(M * K * sizeof(float));
+  hostB = (float *)malloc(K * N * sizeof(float));
+  hostC = (float *)malloc(M * N * sizeof(float));
+  gpuRef = (float *)malloc(M * N * sizeof(float));
 
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
   cinitialData.initialDataABCByFile(hostA, hostB, hostC, n, n);
-  memset(gpuRef, 0, elemNum * sizeof(float));
+  memset(gpuRef, 0, M * N * sizeof(float));
   // -------------------------------------------------------------------------------------GPU计时
 
   cudaEvent_t start, stop;
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
   cudaEventCreate(&stop);
 
   // -----------------------------------------------------------------------------------------
-  // 使用cuda kernel 来执行矩阵乘法
+  // 使用 cuda kernel 来执行矩阵乘法
   dim3 blockDim(BLOCK_DIM_x, BLOCK_DIM_y);
   dim3 gridDim((n + blockDim.x - 1) / blockDim.x,
                (n + blockDim.y - 1) / blockDim.y);
