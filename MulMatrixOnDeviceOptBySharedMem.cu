@@ -89,15 +89,23 @@ int main(int argc, char **argv) {
                    cudaMemcpyHostToDevice));
   CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
                    cudaMemcpyHostToDevice));
-  cudaEventRecord(start, 0);
+
   MulMatrixOnDeviceOptBySharedMem<32>
       <<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB, beta, deviceC);
+  cudaEventRecord(start, 0);
+  // =----------------------------------------------------------------------------------------
+  int repeat = 20;
+  for (int i = 0; i < repeat; i++) {
+    MulMatrixOnDeviceOptBySharedMem<32><<<gridDim, blockDim>>>(
+        n, n, n, alpha, deviceA, deviceB, beta, deviceC);
+  }
 
+  // =----------------------------------------------------------------------------------------
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
 
   cudaEventElapsedTime(&time, start, stop);
-  printf("MulMatrixOnDeviceOptBySharedMem Time elapsed %f ms\n", time);
+  printf("MulMatrixOnDeviceOptBySharedMem Time elapsed %f ms\n", time / repeat);
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
 
