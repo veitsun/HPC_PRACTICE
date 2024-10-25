@@ -20,7 +20,7 @@ else()
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CUDA_ARCHITECTURES 60)
+set(CUDA_ARCHITECTURES 80)
 set(CMAKE_CUDA_COMPILER "nvcc")
 
 include_directories(include)
