@@ -9,6 +9,7 @@
 const int NUM_RANDOM_NUMBERS = n * n;        // 生成随机数的数量
 const char *FILENAME = "random_numbers.txt"; // 文件名
 int main() {
+  return 0; // 禁止更新random_numbers文件里面的内容
   // generate different seed for random number
   time_t t;
   srand((unsigned)time(&t));
