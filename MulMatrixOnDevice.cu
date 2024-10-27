@@ -11,6 +11,8 @@
 // #include <iostream>
 using namespace std;
 
+// #define CEIL_DIV(M, N) (((M) + (N) - 1) / (N))
+
 // 朴素实现
 __global__ void MulMatrixOnDevice(int M, int N, int K, float alpha,
                                   const float *A, const float *B, float beta,
@@ -114,10 +116,11 @@ __global__ void _sgemm1DBlocktiling(int M, int N, int K, float alpha,
   // The slower configuration would share columns of A, but access into B would
   // be non-sequential. So the faster configuration has better spatial locality
   // and hence a greater L2 hit rate.
-  const uint cRow = blockIdx.y;
+  const uint cRow = blockIdx.y; // cRou 和 cCol 块索引
   const uint cCol = blockIdx.x;
 
   // each warp will calculate 32*TM elements, with 32 being the columnar dim.
+  // 每个warp将计算 32 * TM 元素，其中 32 是柱状维度
   const int threadCol = threadIdx.x % BN;
   const int threadRow = threadIdx.x / BN;
 
@@ -180,87 +183,112 @@ __global__ void _sgemm1DBlocktiling(int M, int N, int K, float alpha,
 // 的基本思想是每个线程计算C的8*8个元素的网格，内核的第一阶段是让所有的线程一起工作来填充SMEM缓存。我们将让每个线程加载多个元素
 template <const int BM, const int BN, const int BK, const int TM, const int TN>
 __global__ void __launch_bounds__((BM * BN) / (TM * TN), 1)
-    sgemm2DBlocktiling(int M, int N, int K, float alpha, const float *A,
-                       const float *B, float beta, float *C) {
+    _sgemm2DBlocktiling(int M, int N, int K, float alpha, const float *A,
+                        const float *B, float beta, float *C) {
+  // __launch_bounds__((BM*BN) / (TM*TN), 1) 这个修饰符指定了内核的启动约束。
+  // BM 和 BN 是块的维度（行和列） ， TM 和 TN 是线程的维度（行和列）
+  // 这个表达式计算每个块的最大线程数，并限制每个块的线程数，帮助优化调度
   const uint cRow = blockIdx.y;
   const uint cCol = blockIdx.x;
 
-  const uint totalResultsBlocktile = BM * BN;
+  const uint totalResultsBlocktile = BM * BN; // 一个分块元素总数量
   // A thread is responsible for calculating TM*TN elements in the blocktile
-  const uint numThreadsBlocktile = totalResultsBlocktile / (TM * TN);
+  // 一个线程负责计算blocktile中的TM * TN个元素
+  const uint numThreadsBlocktile =
+      totalResultsBlocktile /
+      (TM * TN); // 需要多少个线程来处理掉（一个分块中）共享内存里的全部数据
 
   // ResultsPerBlock / ResultsPerThread == ThreadsPerBlock
-  assert(numThreadsBlocktile == blockDim.x);
+  assert(numThreadsBlocktile ==
+         blockDim.x); // 每个block需要用到的线程数量是不是等于块中的线程总数
 
-  // BN/TN are the number of threads to span a column
-  const int threadCol = threadIdx.x % (BN / TN);
-  const int threadRow = threadIdx.x / (BN / TN);
+  // BN/TN are the number of threads to span a column. BN/TN
+  // 是跨越一行需要的线程数
+  const int threadCol = threadIdx.x % (BN / TN); // 列的线程索引(抽象的)
+  const int threadRow = threadIdx.x / (BN / TN); // 行的线程索引(抽象的)
 
   // allocate space for the current blocktile in smem
+  // 在共享内存中给当前的块片分配空间
   __shared__ float As[BM * BK];
   __shared__ float Bs[BK * BN];
 
-  // Move blocktile to beginning of A's row and B's column
+  // Move blocktile to beginning of A's row and B's column移动到索引位置
+  // 这里每个block的cRow和cCol是一样的,也就是说每block的ABC起始位置都是一样的
   A += cRow * BM * K;
   B += cCol * BN;
   C += cRow * BM * N + cCol * BN;
 
   // calculating the indices that this thread will load into SMEM
+  // 计算被加载到共享内存的，这个分块对于整体所在的位置
   const uint innerRowA = threadIdx.x / BK;
   const uint innerColA = threadIdx.x % BK;
   // calculates the number of rows of As that are being loaded in a single step
   // by a single block
-  const uint strideA = numThreadsBlocktile / BK;
+  const uint strideA =
+      numThreadsBlocktile / BK; // 对应分块A中，一共可以使用的线程数量
+
   const uint innerRowB = threadIdx.x / BN;
   const uint innerColB = threadIdx.x % BN;
   // for both As and Bs we want each load to span the full column-width, for
   // better GMEM coalescing (as opposed to spanning full row-width and iterating
   // across columns)
-  const uint strideB = numThreadsBlocktile / BN;
+  // 对于A和B，我们希望每次加载都能跨越整个列宽，以便更好地进行全局内存合并（而不是跨越整个行宽并跨列迭代）
+  const uint strideB =
+      numThreadsBlocktile / BN; // 对应分块B中，一共可以使用的线程数量
 
-  // allocate thread-local cache for results in registerfile
+  // allocate thread-local cache for results in registerfile  为
+  // 寄存器文件中的结果 分配 线程本地缓存
   float threadResults[TM * TN] = {0.0};
-  // register caches for As and Bs
+  // register caches for As and Bs 给AS和BS的寄存器缓存
   float regM[TM] = {0.0};
   float regN[TN] = {0.0};
 
-  // outer-most loop over block tiles
-  for (uint bkIdx = 0; bkIdx < K; bkIdx += BK) {
-    // populate the SMEM caches
-    for (uint loadOffset = 0; loadOffset < BM; loadOffset += strideA) {
+  // outer-most loop over block tiles 最外层循环遍历方块
+  for (uint bkIdx = 0; bkIdx < K;
+       bkIdx += BK) { // block索引依次遍历，宽度是BK，分块地宽度是BK
+    // populate the SMEM caches 填充共享内存缓存
+    for (uint loadOffset = 0; loadOffset < BM;
+         loadOffset += strideA) { // 将全局内存中的数据加载到共享内存中
       As[(innerRowA + loadOffset) * BK + innerColA] =
           A[(innerRowA + loadOffset) * K + innerColA];
     }
-    for (uint loadOffset = 0; loadOffset < BK; loadOffset += strideB) {
+    for (uint loadOffset = 0; loadOffset < BK;
+         loadOffset += strideB) { // 将全局内存中的数据加载到共享内存中
       Bs[(innerRowB + loadOffset) * BN + innerColB] =
           B[(innerRowB + loadOffset) * N + innerColB];
     }
     __syncthreads();
+    // 现在共享内存缓存已经填充完毕，我们让每个线程将其相关的共享内存条目相乘，并将结果累计到本地寄存器中。
 
     // advance blocktile
-    A += BK;     // move BK columns to right
-    B += BK * N; // move BK rows down
+    A += BK;     // move BK columns to right 将A首地址移动到右边
+    B += BK * N; // move BK rows down 将B的首地址移动到下面
 
-    // calculate per-thread results
+    // calculate per-thread results 计算每个线程的结果
     for (uint dotIdx = 0; dotIdx < BK; ++dotIdx) {
-      // block into registers
+      // block into registers  将As和Bs相关的条目加载到寄存器中
+      // 两个for i循环将重复使用的线程分片元素加载至寄存器。
       for (uint i = 0; i < TM; ++i) {
         regM[i] = As[(threadRow * TM + i) * BK + dotIdx];
+        // 将As的共享内存中的数据加载到寄存器中
       }
       for (uint i = 0; i < TN; ++i) {
         regN[i] = Bs[dotIdx * BN + threadCol * TN + i];
+        // 将Bs的共享内存中的数据加载到寄存器中
       }
+      // 在寄存器缓存中计算外积，把结果放进结果数组中
       for (uint resIdxM = 0; resIdxM < TM; ++resIdxM) {
         for (uint resIdxN = 0; resIdxN < TN; ++resIdxN) {
           threadResults[resIdxM * TN + resIdxN] +=
               regM[resIdxM] * regN[resIdxN];
         }
       }
+      // 在内层循环中，我们可以通过将dotIdx作为外层循环，并将两个内层循环所需的值显式加载到寄存器中，来减少对共享内存的访问次数
     }
     __syncthreads();
   }
 
-  // write out the results
+  // write out the results 将结果写回
   for (uint resIdxM = 0; resIdxM < TM; ++resIdxM) {
     for (uint resIdxN = 0; resIdxN < TN; ++resIdxN) {
       C[(threadRow * TM + resIdxM) * N + threadCol * TN + resIdxN] =
@@ -298,9 +326,9 @@ int main(int argc, char **argv) {
 
   // -----------------------------------------------------------------------------------------
   // 使用 cuda kernel 来执行矩阵乘法
-  dim3 blockDim(BLOCK_DIM_x, BLOCK_DIM_y);
-  dim3 gridDim((n + blockDim.x - 1) / blockDim.x,
-               (n + blockDim.y - 1) / blockDim.y);
+  // dim3 blockDim(BLOCK_DIM_x, BLOCK_DIM_y);
+  // dim3 gridDim((n + blockDim.x - 1) / blockDim.x,
+  //              (n + blockDim.y - 1) / blockDim.y);
   float *deviceA;
   float *deviceB;
   float *deviceC;
@@ -328,10 +356,40 @@ int main(int argc, char **argv) {
   //     <<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB, beta,
   //     deviceC);
 
-  // 用于计算每个线程的多个结果的一维块分片
-  _sgemm1DBlocktiling<64, 64, 8, 8><<<(n * n + 511) / 512, 512>>>(
-      M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+  // // 用于计算每个线程的多个结果的一维块分片
+  // const uint BM = 64;
+  // const uint BN = 64;
+  // const uint BK = 8;
+  // const uint TM = 8;
+  // dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  // dim3 blockDim((BM * BN) / TM);
+  // _sgemm1DBlocktiling<BM, BN, BK, TM>
+  //     <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
+  //     deviceC);
 
+  // 通过二维块分片增加计算强度
+  const uint BK = 8;
+  const uint TM = 8;
+  const uint TN = 8;
+  // if (M >= 128 and N >= 128) {
+  const uint BM = 128;
+  const uint BN = 128;
+  dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  dim3 blockDim((BM * BN) / (TM * TN));
+  _sgemm2DBlocktiling<BM, BN, BK, TM, TN>
+      <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+  // } else {
+  //   // this is a hacky solution to the underlying problem
+  //   // of not having proper bounds checking in the kernel
+  //   const uint BM = 64;
+  //   const uint BN = 64;
+  //   dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  //   dim3 blockDim((BM * BN) / (TM * TN));
+  //   _sgemm2DBlocktiling<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
+  //       M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+  // }
+
+  // --------------------------------------------------------------------------------------------kernel开始计时
   cudaEventRecord(start, 0);
   // --------------------------------------------------------------------------------------------kernel
 
@@ -351,9 +409,14 @@ int main(int argc, char **argv) {
     //                                                    deviceB, beta,
     //                                                    deviceC);
 
-    // 用于计算每个线程的多个结果的一维块分片
-    _sgemm1DBlocktiling<64, 64, 8, 8><<<(n * n + 511) / 512, 512>>>(
+    // // 用于计算每个线程的多个结果的一维块分片
+    // _sgemm1DBlocktiling<64, 64, 8, 8><<<(n * n + 511) / 512, 512>>>(
+    //     M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+
+    // 通过二维块分片增加计算强度
+    _sgemm2DBlocktiling<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
         M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+
   } // MulMatrixOnDevice
   // --------------------------------------------------------------------------------------------kernel
   cudaError_t err = cudaGetLastError();
