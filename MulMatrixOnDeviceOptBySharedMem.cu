@@ -18,8 +18,8 @@ __global__ void MulMatrixOnDeviceOptBySharedMem(int M, int N, int K,
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
   float temp = 0.0f;
-  __shared__ float sharedA[BLOCK_DIM][BLOCK_DIM];
-  __shared__ float sharedB[BLOCK_DIM][BLOCK_DIM];
+  __shared__ float sharedA[BLOCK_DIM][BLOCK_DIM + 1];
+  __shared__ float sharedB[BLOCK_DIM][BLOCK_DIM + 1];
   int width = (K + BLOCK_DIM - 1) / BLOCK_DIM;
 
   for (int ph = 0; ph < width; ph++) {

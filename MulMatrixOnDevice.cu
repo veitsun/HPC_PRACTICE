@@ -456,17 +456,18 @@ int main(int argc, char **argv) {
   //     <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
   //     deviceC);
 
-  // 通过二维块分片增加计算强度
-  const uint BK = 8;
-  const uint TM = 8;
-  const uint TN = 8;
-  // if (M >= 128 and N >= 128) {
-  const uint BM = 128;
-  const uint BN = 128;
-  dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
-  dim3 blockDim((BM * BN) / (TM * TN));
-  _sgemm2DBlocktiling<BM, BN, BK, TM, TN>
-      <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+  // // 通过二维块分片增加计算强度
+  // const uint BK = 8;
+  // const uint TM = 8;
+  // const uint TN = 8;
+  // // if (M >= 128 and N >= 128) {
+  // const uint BM = 128;
+  // const uint BN = 128;
+  // dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  // dim3 blockDim((BM * BN) / (TM * TN));
+  // _sgemm2DBlocktiling<BM, BN, BK, TM, TN>
+  //     <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
+  //     deviceC);
   // } else {
   //   // this is a hacky solution to the underlying problem
   //   // of not having proper bounds checking in the kernel
@@ -476,6 +477,30 @@ int main(int argc, char **argv) {
   //   dim3 blockDim((BM * BN) / (TM * TN));
   //   _sgemm2DBlocktiling<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
   //       M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+  // }
+
+  // 向量化 SMEM 和 GMEM 访问
+  const uint BK = 8;
+  const uint TM = 8;
+  const uint TN = 8;
+  // if (M >= 128 and N >= 128) {
+  const uint BM = 128;
+  const uint BN = 128;
+  dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  dim3 blockDim((BM * BN) / (TM * TN));
+  _sgemmVectorize<BM, BN, BK, TM, TN>
+      <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+  // }
+  // else {
+  //   // this is a hacky solution to the underlying problem
+  //   // of not having proper bounds checking in the kernel
+  //   const uint BM = 64;
+  //   const uint BN = 64;
+  //   dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  //   dim3 blockDim((BM * BN) / (TM * TN));
+  //   _sgemmVectorize<BM, BN, BK, TM, TN>
+  //       <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
+  //       deviceC);
   // }
 
   // --------------------------------------------------------------------------------------------kernel开始计时
@@ -502,8 +527,12 @@ int main(int argc, char **argv) {
     // _sgemm1DBlocktiling<64, 64, 8, 8><<<(n * n + 511) / 512, 512>>>(
     //     M, N, K, alpha, deviceA, deviceB, beta, deviceC);
 
-    // 通过二维块分片增加计算强度
-    _sgemm2DBlocktiling<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
+    // // 通过二维块分片增加计算强度
+    // _sgemm2DBlocktiling<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
+    //     M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+
+    // 向量化 SMEM 和 GMEM 访问
+    _sgemmVectorize<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
         M, N, K, alpha, deviceA, deviceB, beta, deviceC);
 
   } // MulMatrixOnDevice
