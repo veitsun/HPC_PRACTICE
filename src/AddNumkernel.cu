@@ -1,4 +1,4 @@
-#include "../include/AddNumkernel.cuh"
+#include "AddNumkernel.cuh"
 
 // 内核函数
 __global__ void Add(int *a, int *b, int *c, int DX) {

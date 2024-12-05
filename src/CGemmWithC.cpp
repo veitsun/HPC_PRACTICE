@@ -1,4 +1,4 @@
-#include "../include/CGemmWithC.h"
+#include "CGemmWithC.h"
 #include <cstdio>
 #include <iostream>
 

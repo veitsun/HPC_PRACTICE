@@ -1,4 +1,4 @@
-#include "../include/CAddNumkernel.h"
+#include "CAddNumkernel.h"
 
 void CAddNumkernel::setParameter() {
   cudaMallocManaged(&a, sizeof(int) * DX);

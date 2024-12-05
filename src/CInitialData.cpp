@@ -1,5 +1,5 @@
-#include "../include/CInitialData.h"
-#include "../include/common.h"
+#include "CInitialData.h"
+#include "common.h"
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>

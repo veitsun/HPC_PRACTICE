@@ -1,8 +1,8 @@
-#include "include/CGemmWithC.h"
-#include "include/CInitialData.h"
-#include "include/CPrintMatrix.h"
-#include "include/Num.h"
-#include "include/common.h"
+#include "CGemmWithC.h"
+#include "CInitialData.h"
+#include "CPrintMatrix.h"
+#include "Num.h"
+#include "common.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

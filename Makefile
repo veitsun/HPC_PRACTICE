@@ -5,10 +5,12 @@ BUILD_DIR  = build
 CMK = cmake
 
 # 设置 CMake 配置命令
-CMK_CONFIG = $(CMK) -S . -B$(BUILD_DIR)
+# CMK_CONFIG = $(CMK) -S . -B$(BUILD_DIR)
+CMK_CONFIG = $(CMK) -G Ninja -S . -B $(BUILD_DIR)
 
 # 设置 CMake 构建命令
-CMK_BUILD = $(CMK) --build $(BUILD_DIR)
+# CMK_BUILD = $(CMK) --build $(BUILD_DIR)
+CMK_BUILD = ninja -C build
 
 # 设置清理命令
 CLEAN = rm -rf $(BUILD_DIR)

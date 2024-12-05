@@ -1,4 +1,4 @@
-#include "../include/Harem.h"
+#include "Harem.h"
 #include <iostream>
 
 Harem::Harem(int age, int height, int weight) {

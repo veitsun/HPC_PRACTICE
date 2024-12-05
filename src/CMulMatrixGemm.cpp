@@ -1,4 +1,4 @@
-#include "../include/CMulMatrixGemm.h"
+#include "CMulMatrixGemm.h"
 // 具体实现还没有写完
 void CMulMatrixGemm::initData() {}
 
