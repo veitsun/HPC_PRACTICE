@@ -3,7 +3,6 @@ random_numbers.txt
 .clangd
 main
 build
-.vscode
 .cache
 .clang-tidy
 CodeSamples
