@@ -19,6 +19,16 @@ else()
     message(STATUS "Found cuBLAS library: ${CUBLAS_LIBRARY}")
 endif()
 
+# 查找 OpenMP 包
+# find_package(OpenMP REQUIRED)
+# if (${OpenMP_FOUND})
+#   set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+# else()
+#   set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas -Wno-unused-private-field")
+# endif()
+
 set(CUDA_ARCHITECTURES 89)
 set(CMAKE_CUDA_COMPILER "nvcc")
 

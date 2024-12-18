@@ -1,6 +1,6 @@
-#include "include/CInitialData.h"
-#include "include/CPrintMatrix.h"
-#include "include/Num.h"
+#include "CInitialData.h"
+#include "CPrintMatrix.h"
+#include "Num.h"
 #include <cuda.h>
 #include <stdio.h>
 #include <sys/time.h>
