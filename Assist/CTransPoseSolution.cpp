@@ -1,4 +1,4 @@
-#include "../include/CTransPoseSolution.h"
+#include "CTransPoseSolution.h"
 
 // 后继
 int CTransPoseSolution::getNext(int i, int m, int n) {

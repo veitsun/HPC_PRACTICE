@@ -1,4 +1,4 @@
-#include "../include/CPrintMatrix.h"
+#include "CPrintMatrix.h"
 #include <cstdio>
 #include <fstream>
 #include <iomanip>

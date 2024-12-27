@@ -1,4 +1,4 @@
-#include "../include/CCheckResult.h"
+#include "CCheckResult.h"
 #include <cmath>
 #include <cstdio>
 
