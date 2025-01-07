@@ -29,7 +29,7 @@ endif()
 #   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas -Wno-unused-private-field")
 # endif()
 
-set(CUDA_ARCHITECTURES 89)
+set(CUDA_ARCHITECTURES 90)
 set(CMAKE_CUDA_COMPILER "nvcc")
 
 include_directories(${INCLUDE_DIR})
@@ -37,6 +37,7 @@ include_directories(${INCLUDE_DIR})
 # include_directories(kernels)
 add_subdirectory(src)
 add_subdirectory(Assist)
+add_subdirectory(GEMM)
 # add_subdirectory(kernels)
 
 

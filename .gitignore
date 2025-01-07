@@ -6,7 +6,5 @@ build
 .cache
 .clang-tidy
 CodeSamples
-.gitignore
 data.txt
 __MACOSX
-DASP.zip

@@ -1,5 +1,6 @@
 #define CEIL_DIV(a, b) (((a) + (b) - 1) / (b))
-const int n = 4092;
+// const int n = 4092;
+const int n = 1024;
 
 const int M = n;
 const int N = n;
