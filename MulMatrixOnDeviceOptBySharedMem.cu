@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 
   // -----------------------------------------------------------------------------------------
   // 使用cuda kernel 来执行矩阵乘法
-  dim3 blockDim(BLOCK_DIM_x, BLOCK_DIM_y);
+  dim3 blockDim(BLOCK_DIM_X, BLOCK_DIM_Y);
   dim3 gridDim((n + blockDim.x - 1) / blockDim.x,
                (n + blockDim.y - 1) / blockDim.y);
   float *deviceA;

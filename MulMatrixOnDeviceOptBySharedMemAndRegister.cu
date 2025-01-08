@@ -11,8 +11,8 @@ using namespace std;
 
 const int TM = 4;
 const int TN = 4;
-const int BM = TM * BLOCK_DIM_x;
-const int BN = TN * BLOCK_DIM_y;
+const int BM = TM * BLOCK_DIM_X;
+const int BN = TN * BLOCK_DIM_Y;
 const int BK = 8;
 
 template <int BM, int BN, int BK, int TM, int TN>
@@ -161,7 +161,7 @@ void hostMatrix(float *hostA, float *hostB, float *hostC, int M, int K, int N) {
 
   int num_blocks_x = (M + BM - 1) / BM;
   int num_blocks_y = (N + BN - 1) / BN;
-  dim3 block_dim(BLOCK_DIM_x, BLOCK_DIM_y, 1);
+  dim3 block_dim(BLOCK_DIM_X, BLOCK_DIM_Y, 1);
   dim3 grid_dim(num_blocks_x, num_blocks_y, 1);
   int repeat = 20;
   matrixKernel1st<BM, BN, BK, TM, TN>

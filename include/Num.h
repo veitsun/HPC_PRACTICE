@@ -6,8 +6,8 @@ const int M = n;
 const int N = n;
 const int K = n;
 
-const int BLOCK_DIM_x = 32;
-const int BLOCK_DIM_y = 32;
+const int BLOCK_DIM_X = 32;
+const int BLOCK_DIM_Y = 32;
 
 // const int BLOCK_DIM_x = 16;
 // const int BLOCK_DIM_y = 16;
