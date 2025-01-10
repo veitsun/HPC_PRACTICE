@@ -1,10 +1,7 @@
 fileoutput.txt
 random_numbers.txt
-.clangd
-main
 build
 .cache
-.clang-tidy
 CodeSamples
 data.txt
 __MACOSX
