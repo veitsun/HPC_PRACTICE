@@ -71,3 +71,24 @@ void CInitialData::initialMatrixGemmData(CMulMatrixGemm girl) {
   cudaMemcpy(deviceB, girl.B, elemNum * sizeof(float), cudaMemcpyHostToDevice);
   cudaMemcpy(deviceC, girl.C, elemNum * sizeof(float), cudaMemcpyHostToDevice);
 }
+
+void CInitialData::initialDataABCByFileNames(float *A, float *B, float *C,
+                                             int nx, int ny,
+                                             const char *FILENAME) {
+  // FILENAME = "./data/" + "random_numbers.txt"; // 文件名
+  const int MAX_NUMBERS = nx * ny;
+  std::ifstream inputFile(FILENAME);
+  if (!inputFile.is_open()) {
+    std::cerr << "无法打开文件 " << FILENAME << std::endl;
+    return;
+  }
+  int count = 0;
+  float number;
+  while (inputFile >> number && count < MAX_NUMBERS) {
+    *(A + count) = number;
+    *(B + count) = number;
+    *(C + count) = number;
+    count++;
+  }
+  inputFile.close();
+}

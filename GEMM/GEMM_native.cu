@@ -37,7 +37,9 @@ int main(int argc, char *argv[]) {
   hostC = (float *)malloc(elemNum * sizeof(float));
 
   CInitialData cinitialdata;
-  cinitialdata.initialDataABCByFile(hostA, hostB, hostC, n, n);
+  // cinitialdata.initialDataABCByFile(hostA, hostB, hostC, n, n);
+  cinitialdata.initialDataABCByFileNames(hostA, hostB, hostC, n, n,
+                                         "./data/random_numbers.txt");
 
   float *deviceA;
   float *deviceB;
@@ -72,7 +74,8 @@ int main(int argc, char *argv[]) {
 
   CHECK(cudaMemcpy(hostC, deviceC, elemNum, cudaMemcpyDeviceToHost));
   CPrintMatrix cprintmatrix;
-  cprintmatrix.printMatrixCinFile(hostC, n, n);
+  // cprintmatrix.printMatrixCinFile(hostC, n, n);
+  cprintmatrix.printMatrixCinFileByNames(hostC, n, n, "./data/result.txt");
   CHECK(cudaFree(deviceA));
   CHECK(cudaFree(deviceB));
   CHECK(cudaFree(deviceC));
