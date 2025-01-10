@@ -415,9 +415,9 @@ int main(int argc, char **argv) {
 
   // -----------------------------------------------------------------------------------------
   // 使用 cuda kernel 来执行矩阵乘法
-  // dim3 blockDim(BLOCK_DIM_x, BLOCK_DIM_y);
-  // dim3 gridDim((n + blockDim.x - 1) / blockDim.x,
-  //              (n + blockDim.y - 1) / blockDim.y);
+  dim3 blockDim(BLOCK_DIM_X, BLOCK_DIM_Y);
+  dim3 gridDim((n + blockDim.x - 1) / blockDim.x,
+               (n + blockDim.y - 1) / blockDim.y);
   float *deviceA;
   float *deviceB;
   float *deviceC;
@@ -479,17 +479,18 @@ int main(int argc, char **argv) {
   //       M, N, K, alpha, deviceA, deviceB, beta, deviceC);
   // }
 
-  // 向量化 SMEM 和 GMEM 访问
-  const uint BK = 8;
-  const uint TM = 8;
-  const uint TN = 8;
-  // if (M >= 128 and N >= 128) {
-  const uint BM = 128;
-  const uint BN = 128;
-  dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
-  dim3 blockDim((BM * BN) / (TM * TN));
-  _sgemmVectorize<BM, BN, BK, TM, TN>
-      <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+  // // 向量化 SMEM 和 GMEM 访问
+  // const uint BK = 8;
+  // const uint TM = 8;
+  // const uint TN = 8;
+  // // if (M >= 128 and N >= 128) {
+  // const uint BM = 128;
+  // const uint BN = 128;
+  // dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  // dim3 blockDim((BM * BN) / (TM * TN));
+  // _sgemmVectorize<BM, BN, BK, TM, TN>
+  //     <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
+  //     deviceC);
   // }
   // else {
   //   // this is a hacky solution to the underlying problem
@@ -508,10 +509,9 @@ int main(int argc, char **argv) {
   // --------------------------------------------------------------------------------------------kernel
 
   for (int i = 0; i < repeat; i++) {
-    // // 朴素的矩阵乘法
-    // MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA,
-    // deviceB,
-    //                                          beta, deviceC);
+    // 朴素的矩阵乘法
+    MulMatrixOnDevice<<<gridDim, blockDim>>>(n, n, n, alpha, deviceA, deviceB,
+                                             beta, deviceC);
 
     // // 全局内存合并
     // _sgemm_global_mem_coalesce<32><<<gridDim, blockDim>>>(
@@ -531,9 +531,9 @@ int main(int argc, char **argv) {
     // _sgemm2DBlocktiling<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
     //     M, N, K, alpha, deviceA, deviceB, beta, deviceC);
 
-    // 向量化 SMEM 和 GMEM 访问
-    _sgemmVectorize<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
-        M, N, K, alpha, deviceA, deviceB, beta, deviceC);
+    // // 向量化 SMEM 和 GMEM 访问
+    // _sgemmVectorize<BM, BN, BK, TM, TN><<<gridDim, blockDim>>>(
+    //     M, N, K, alpha, deviceA, deviceB, beta, deviceC);
 
   } // MulMatrixOnDevice
   // --------------------------------------------------------------------------------------------kernel

@@ -8,19 +8,32 @@
 // #include <__clang_cuda_builtin_vars.h>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <cuda_runtime.h>
 
 // 朴素的实现方式
-__global__ void matMult(int M, int N, int K, float alpha, float *A, float *B,
-                        float beta, float *C) {
-  int row = blockIdx.y * blockDim.y + threadIdx.y;
-  int col = blockIdx.x * blockDim.x + threadIdx.x;
+// __global__ void matMult(int M, int N, int K, float alpha, float *A, float *B,
+//                         float beta, float *C) {
+//   int row = blockIdx.y * blockDim.y + threadIdx.y;
+//   int col = blockIdx.x * blockDim.x + threadIdx.x;
+//   if (row < M && col < N) {
+//     float sum = 0.0;
+//     for (int i = 0; i < K; i++) {
+//       sum += A[row * K + i] * B[i * N + col];
+//     }
+//     C[row * N + col] = alpha * sum + beta * C[row * N + col];
+//   }
+// }
+__global__ void matMult(int M, int N, int K, float alpha, const float *A,
+                        const float *B, float beta, float *C) {
+  const uint row = blockIdx.y * blockDim.y + threadIdx.y;
+  const uint col = blockIdx.x * blockDim.x + threadIdx.x;
   if (row < M && col < N) {
-    float sum = 0;
-    for (int i = 0; i < K; i++) {
-      sum += A[row * K + i] * B[i * N + col];
+    float temp = 0.0;
+    for (int k = 0; k < K; k++) {
+      temp += A[row * K + k] * B[k * N + col];
     }
-    C[row * N + col] = alpha * sum + beta * C[row * N + col];
+    C[row * N + col] = alpha * temp + beta * C[row * N + col];
   }
 }
 
@@ -31,27 +44,41 @@ int main(int argc, char *argv[]) {
   float *hostA;
   float *hostB;
   float *hostC;
+  float *gpuRef;
 
-  hostA = (float *)malloc(elemNum * sizeof(float));
-  hostB = (float *)malloc(elemNum * sizeof(float));
-  hostC = (float *)malloc(elemNum * sizeof(float));
+  // hostA = (float *)malloc(elemNum * sizeof(float));
+  // hostB = (float *)malloc(elemNum * sizeof(float));
+  // hostC = (float *)malloc(elemNum * sizeof(float));
+  // gpuRef = (float *)malloc(sizeof(float) * elemNum);
+  hostA = (float *)malloc(M * K * sizeof(float));
+  hostB = (float *)malloc(K * N * sizeof(float));
+  hostC = (float *)malloc(M * N * sizeof(float));
+  gpuRef = (float *)malloc(M * N * sizeof(float));
+  memset(gpuRef, 0, M * N * sizeof(float));
 
   CInitialData cinitialdata;
   // cinitialdata.initialDataABCByFile(hostA, hostB, hostC, n, n);
   cinitialdata.initialDataABCByFileNames(hostA, hostB, hostC, n, n,
-                                         "./data/random_numbers.txt");
+                                         INPUTFILENAME.c_str());
 
+  // CPrintMatrix cc;
+  // cc.printMatrix(hostA, n, n);
+  // cc.printMatrix(hostB, n, n);
+  // cc.printMatrix(hostC, n, n);
   float *deviceA;
   float *deviceB;
   float *deviceC;
 
-  CHECK(cudaMalloc((void **)&deviceA, elemNum * sizeof(float)));
-  CHECK(cudaMalloc((void **)&deviceB, elemNum * sizeof(float)));
-  CHECK(cudaMalloc((void **)&deviceC, elemNum * sizeof(float)));
+  CHECK(cudaMalloc((float **)&deviceA, elemNum * sizeof(float)));
+  CHECK(cudaMalloc((float **)&deviceB, elemNum * sizeof(float)));
+  CHECK(cudaMalloc((float **)&deviceC, elemNum * sizeof(float)));
 
-  CHECK(cudaMemcpy(deviceA, hostA, elemNum, cudaMemcpyHostToDevice));
-  CHECK(cudaMemcpy(deviceB, hostB, elemNum, cudaMemcpyHostToDevice));
-  CHECK(cudaMemcpy(deviceC, hostC, elemNum, cudaMemcpyHostToDevice));
+  CHECK(cudaMemcpy(deviceA, hostA, elemNum * sizeof(float),
+                   cudaMemcpyHostToDevice));
+  CHECK(cudaMemcpy(deviceB, hostB, elemNum * sizeof(float),
+                   cudaMemcpyHostToDevice));
+  CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
+                   cudaMemcpyHostToDevice));
 
   dim3 blockDim(BLOCK_DIM_X, BLOCK_DIM_Y);
   dim3 gridDim((n + BLOCK_DIM_X - 1) / BLOCK_DIM_X,
@@ -59,28 +86,30 @@ int main(int argc, char *argv[]) {
 
   int repeat = 20;
   // 朴素的矩阵乘法
-  matMult<<<gridDim, blockDim>>>(M, n, K, alpha, deviceA, deviceB, beta,
+  matMult<<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
                                  deviceC);
 
   startTimer();
   for (int i = 0; i < repeat; i++) {
-    matMult<<<gridDim, blockDim>>>(M, n, K, alpha, deviceA, deviceB, beta,
+    matMult<<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
                                    deviceC);
   }
   float time = stopTimer();
   CHECK(cudaDeviceSynchronize());
-
+  CHECK(cudaMemcpy(gpuRef, deviceC, elemNum * sizeof(float),
+                   cudaMemcpyDeviceToHost));
+  CPrintMatrix cprintmatrix;
   printf("朴素矩阵乘法 Time elapsed %f ms\n", time / repeat);
 
-  CHECK(cudaMemcpy(hostC, deviceC, elemNum, cudaMemcpyDeviceToHost));
-  CPrintMatrix cprintmatrix;
   // cprintmatrix.printMatrixCinFile(hostC, n, n);
-  cprintmatrix.printMatrixCinFileByNames(hostC, n, n, "./data/result.txt");
+  cprintmatrix.printMatrixCinFileByNames(
+      gpuRef, n, n, "./data/output_data/result_native.txt");
   CHECK(cudaFree(deviceA));
   CHECK(cudaFree(deviceB));
   CHECK(cudaFree(deviceC));
   free(hostA);
   free(hostB);
   free(hostC);
+  free(gpuRef);
   return 0;
 }

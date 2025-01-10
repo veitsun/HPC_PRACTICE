@@ -70,11 +70,13 @@ int main(int argc, char **argv) {
   cublasRef = (float *)malloc(elemNum * sizeof(float));
   // 主机上的三个矩阵初始化数据
   CInitialData cinitialData;
-  cinitialData.initialDataABCByFile(hostA, hostB, hostC, n, n);
+  // cinitialData.initialDataABCByFile(hostA, hostB, hostC, n, n);
+  cinitialData.initialDataABCByFileNames(hostA, hostB, hostC, n, n,
+                                         INPUTFILENAME.c_str());
   memset(cublasRef, 0, elemNum * sizeof(float));
 
   // cout << "测试主机上的三个矩阵是否已经被初始化数据" << endl;
-  CPrintMatrix cprintmatrix;
+
   // -----------------------------------------------------------------------------------------
   cout << "使用cublas 执行矩阵乘法" << endl;
   // 使用cublas 执行矩阵乘法
@@ -93,7 +95,10 @@ int main(int argc, char **argv) {
                  cublasRef);
   cublasDestroy(cuHandle);
   // -----------------------------------------------------------------
-  cprintmatrix.printMatrixCinFile(cublasRef, n, n);
+  CPrintMatrix cprintmatrix;
+  // cprintmatrix.printMatrixCinFile(cublasRef, n, n);
+  cprintmatrix.printMatrixCinFileByNames(
+      cublasRef, n, n, "./data/output_data/result_cublas.txt");
   free(hostA);
   free(hostB);
   free(hostC);
