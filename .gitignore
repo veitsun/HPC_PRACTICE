@@ -8,3 +8,5 @@ build
 CodeSamples
 data.txt
 __MACOSX
+data/
+result/
