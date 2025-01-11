@@ -1,33 +1,21 @@
-// #include <__clang_cuda_runtime_wrapper.h>
-// #include <__clang_cuda_builtin_vars.h>
 #include "CInitialData.h"
 #include "CPrintMatrix.h"
 #include "Num.h"
 #include "common.h"
 #include "myBase.cuh"
 // #include <__clang_cuda_builtin_vars.h>
+// #include <__clang_cuda_builtin_vars.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cuda_runtime.h>
 
-// 朴素的实现方式
-// __global__ void matMult(int M, int N, int K, float alpha, float *A, float *B,
-//                         float beta, float *C) {
-//   int row = blockIdx.y * blockDim.y + threadIdx.y;
-//   int col = blockIdx.x * blockDim.x + threadIdx.x;
-//   if (row < M && col < N) {
-//     float sum = 0.0;
-//     for (int i = 0; i < K; i++) {
-//       sum += A[row * K + i] * B[i * N + col];
-//     }
-//     C[row * N + col] = alpha * sum + beta * C[row * N + col];
-//   }
-// }
-__global__ void matMult(int M, int N, int K, float alpha, const float *A,
-                        const float *B, float beta, float *C) {
-  const uint row = blockIdx.x * blockDim.x + threadIdx.x;
-  const uint col = blockIdx.y * blockDim.y + threadIdx.y;
+template <const uint BLOCK_SIZE>
+__global__ void gemm_global_mem_coalesce(int M, int N, int K, float alpha,
+                                         const float *A, const float *B,
+                                         float beta, float *C) {
+  const uint row = blockIdx.x * BLOCK_SIZE + (threadIdx.x / BLOCK_SIZE);
+  const uint col = blockIdx.y * BLOCK_SIZE + (threadIdx.x % BLOCK_SIZE);
   if (row < M && col < N) {
     float temp = 0.0;
     for (int k = 0; k < K; k++) {
@@ -46,10 +34,6 @@ int main(int argc, char *argv[]) {
   float *hostC;
   float *gpuRef;
 
-  // hostA = (float *)malloc(elemNum * sizeof(float));
-  // hostB = (float *)malloc(elemNum * sizeof(float));
-  // hostC = (float *)malloc(elemNum * sizeof(float));
-  // gpuRef = (float *)malloc(sizeof(float) * elemNum);
   hostA = (float *)malloc(M * K * sizeof(float));
   hostB = (float *)malloc(K * N * sizeof(float));
   hostC = (float *)malloc(M * N * sizeof(float));
@@ -57,7 +41,6 @@ int main(int argc, char *argv[]) {
   memset(gpuRef, 0, M * N * sizeof(float));
 
   CInitialData cinitialdata;
-  // cinitialdata.initialDataABCByFile(hostA, hostB, hostC, n, n);
   cinitialdata.initialDataABCByFileNames(hostA, hostB, hostC, n, n,
                                          INPUTFILENAME.c_str());
 
@@ -80,19 +63,19 @@ int main(int argc, char *argv[]) {
   CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
                    cudaMemcpyHostToDevice));
 
-  dim3 blockDim(BLOCK_DIM_X, BLOCK_DIM_Y);
+  dim3 blockDim(BLOCK_DIM_X * BLOCK_DIM_Y);
   dim3 gridDim((n + BLOCK_DIM_X - 1) / BLOCK_DIM_X,
                (n + BLOCK_DIM_Y - 1) / BLOCK_DIM_Y);
 
   int repeat = 20;
   // 朴素的矩阵乘法
-  matMult<<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
-                                 deviceC);
+  gemm_global_mem_coalesce<32>
+      <<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta, deviceC);
 
   startTimer();
   for (int i = 0; i < repeat; i++) {
-    matMult<<<gridDim, blockDim>>>(M, N, K, alpha, deviceA, deviceB, beta,
-                                   deviceC);
+    gemm_global_mem_coalesce<32><<<gridDim, blockDim>>>(M, N, K, alpha, deviceA,
+                                                        deviceB, beta, deviceC);
   }
   float time = stopTimer();
   CHECK(cudaDeviceSynchronize());
@@ -103,7 +86,7 @@ int main(int argc, char *argv[]) {
 
   // cprintmatrix.printMatrixCinFile(hostC, n, n);
   cprintmatrix.printMatrixCinFileByNames(
-      gpuRef, n, n, "./data/output_data/result_native.txt");
+      gpuRef, n, n, "./data/output_data/result_coalesce.txt");
   CHECK(cudaFree(deviceA));
   CHECK(cudaFree(deviceB));
   CHECK(cudaFree(deviceC));

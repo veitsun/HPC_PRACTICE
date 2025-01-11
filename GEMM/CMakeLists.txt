@@ -26,6 +26,7 @@ add_multiple_executables(
   helloworld
   GEMM_cublas
   GEMM_native
+  GEMM_coalesce
 )
 
 
