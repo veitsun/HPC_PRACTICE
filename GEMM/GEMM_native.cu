@@ -46,10 +46,6 @@ int main(int argc, char *argv[]) {
   float *hostC;
   float *gpuRef;
 
-  // hostA = (float *)malloc(elemNum * sizeof(float));
-  // hostB = (float *)malloc(elemNum * sizeof(float));
-  // hostC = (float *)malloc(elemNum * sizeof(float));
-  // gpuRef = (float *)malloc(sizeof(float) * elemNum);
   hostA = (float *)malloc(M * K * sizeof(float));
   hostB = (float *)malloc(K * N * sizeof(float));
   hostC = (float *)malloc(M * N * sizeof(float));
@@ -57,7 +53,6 @@ int main(int argc, char *argv[]) {
   memset(gpuRef, 0, M * N * sizeof(float));
 
   CInitialData cinitialdata;
-  // cinitialdata.initialDataABCByFile(hostA, hostB, hostC, n, n);
   cinitialdata.initialDataABCByFileNames(hostA, hostB, hostC, n, n,
                                          INPUTFILENAME.c_str());
 
@@ -101,7 +96,6 @@ int main(int argc, char *argv[]) {
   CPrintMatrix cprintmatrix;
   printf("朴素矩阵乘法 Time elapsed %f ms\n", time / repeat);
 
-  // cprintmatrix.printMatrixCinFile(hostC, n, n);
   cprintmatrix.printMatrixCinFileByNames(
       gpuRef, n, n, "./data/output_data/result_native.txt");
   CHECK(cudaFree(deviceA));
