@@ -172,7 +172,7 @@
 
 
 ---
-在16384情况下
+在 mnk 是16384情况下
 | kernel                          | Time(ms)(%)  | Memory Throughput(GB/s)(%) | performance(GFLOPS) |
 | ------------------------------- | ------------ | -------------------------- | ------------------- |
 | 0_cublas                        | 169          | 669 (68%)                  | 51926.8             |
@@ -187,4 +187,4 @@
 | 9_kernel_autotuned              | 227          | 605(61%)                   | 38656.8             |
 | 10_kernel_warptiling            | 212          | 662(67%)                   | 41486.0             |
 | 11_kernel_double_buffering      | 237          | 406(41%)                   | 37086.1             |
-| 12_kernel_double_buffering      | 234          | 520(52%)                   | 37584.4              |
+| 12_kernel_double_buffering      | 234          | 520(52%)                   | 37584.4             |
