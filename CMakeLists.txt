@@ -31,7 +31,8 @@ endif()
 #   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas -Wno-unused-private-field")
 # endif()
 
-set(CUDA_ARCHITECTURES 90)
+set(CUDA_ARCHITECTURES 86) # for RTX 3080ti
+# set(CUDA_ARCHITECTURES 90) # for H100
 set(CMAKE_CUDA_COMPILER "nvcc")
 
 include_directories(${INCLUDE_DIR})

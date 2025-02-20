@@ -7,7 +7,7 @@ else()
     message(STATUS "Found cuBLAS library: ${CUBLAS_LIBRARY}")
 endif()
 
-set(CUDA_ARCHITECTURES 90)
+# set(CUDA_ARCHITECTURES 90)
 set(CMAKE_CUDA_COMPILER "nvcc")
 
 include_directories(${INCLUDE_DIR})
