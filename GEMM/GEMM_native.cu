@@ -68,12 +68,28 @@ int main(int argc, char *argv[]) {
   CHECK(cudaMalloc((float **)&deviceB, elemNum * sizeof(float)));
   CHECK(cudaMalloc((float **)&deviceC, elemNum * sizeof(float)));
 
-  CHECK(cudaMemcpy(deviceA, hostA, elemNum * sizeof(float),
-                   cudaMemcpyHostToDevice));
-  CHECK(cudaMemcpy(deviceB, hostB, elemNum * sizeof(float),
-                   cudaMemcpyHostToDevice));
-  CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
-                   cudaMemcpyHostToDevice));
+  // CHECK(cudaMemcpy(deviceA, hostA, elemNum * sizeof(float),
+  //                  cudaMemcpyHostToDevice));
+  // CHECK(cudaMemcpy(deviceB, hostB, elemNum * sizeof(float),
+  //                  cudaMemcpyHostToDevice));
+  // CHECK(cudaMemcpy(deviceC, hostC, elemNum * sizeof(float),
+  //                  cudaMemcpyHostToDevice));
+  cudaStream_t stream1, stream2, stream3;
+  CHECK(cudaStreamCreate(&stream1));
+  CHECK(cudaStreamCreate(&stream2));
+  CHECK(cudaStreamCreate(&stream3));
+
+  CHECK(cudaMemcpyAsync(deviceA, hostA, elemNum * sizeof(float),
+                        cudaMemcpyHostToDevice, stream1));
+  CHECK(cudaMemcpyAsync(deviceB, hostB, elemNum * sizeof(float),
+                        cudaMemcpyHostToDevice, stream2));
+  CHECK(cudaMemcpyAsync(deviceC, hostC, elemNum * sizeof(float),
+                        cudaMemcpyHostToDevice, stream3));
+
+  // 同步每个流，确保流中的所有操作都执行完成
+  CHECK(cudaStreamSynchronize(stream1));
+  CHECK(cudaStreamSynchronize(stream2));
+  CHECK(cudaStreamSynchronize(stream3));
 
   dim3 blockDim(BLOCK_DIM_X, BLOCK_DIM_Y);
   dim3 gridDim((n + BLOCK_DIM_X - 1) / BLOCK_DIM_X,

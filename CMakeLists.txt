@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.23)
 set(CMAKE_CUDA_ARCHITECTURES "native")
-project(HPC_PRACTICE CXX CUDA)
+# set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+project(HPC_PRACTICE LANGUAGES CXX CUDA)
+
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
@@ -38,6 +40,7 @@ include_directories(${INCLUDE_DIR})
 add_subdirectory(src)
 add_subdirectory(Assist)
 add_subdirectory(GEMM)
+add_subdirectory(sunwei_test)
 # add_subdirectory(kernels)
 
 
