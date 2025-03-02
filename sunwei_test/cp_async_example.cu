@@ -10,11 +10,12 @@
  */
 
 #include "common.h"
+// #include <__clang_cuda_runtime_wrapper.h>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 __global__ void kernel(float *d_out, const float *d_in) {
-  __shared__ float s_data[4];
+  __align__(128) __shared__ float s_data[4];
 
   // 异步拷贝数据到共享内存
   // cp.async.ca.shared.global指令将数据从全局内存异步拷贝到共享内存
