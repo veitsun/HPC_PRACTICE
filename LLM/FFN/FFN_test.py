@@ -19,8 +19,17 @@ print(X)
 print(X_test)
 
 nn = neural_network()
-o = nn.forward(X)
+# o = nn.forward(X)
+for i in range(150000): # 训练 1000 次
+  print("Input: \n" + str(X))
+  print("Actual Output: \n" + str(y))
+  print("Predicted Output: \n" + str(nn.forward(X)))
+  print("Loss: \n" + str(np.mean(np.square(y - nn.forward(X))))) # 取 square 的原因是 有的误差是负数，这个损失值只是一种量化我们与“完美”神经网络之间距离的方法。
+  print("\n")
+  nn.train(X, y)
 
-print("Predicted Output: \n" + str(o))
-print("Actual Output: \n" + str(y))
+nn.saveWeights()
+nn.predictfunction(X_test)
+# print("Predicted Output: \n" + str(o))
+# print("Actual Output: \n" + str(y))
 

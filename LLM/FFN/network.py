@@ -17,7 +17,7 @@ class neural_network(object):
 
   # 一旦设置好所有的变量，我们就可以编写 forward 传播函数了，
   # 激活函数
-  def sigmod(sef, s):
+  def sigmoid(sef, s):
     return 1/(1+np.exp(-s))
 
   # forward function 前向传播函数
@@ -26,12 +26,12 @@ class neural_network(object):
 
   def forward(self, X):
     self.z = np.dot(X, self.W1) # dot product of X (input) and first set of 3x2 weights
-    self.z2 = self.sigmod(self.z) # 激活函数
+    self.z2 = self.sigmoid(self.z) # 激活函数
     self.z3 = np.dot(self.z2, self.W2) # dot product of hidden layer (z2) and second set of 3x1 weights
-    o = self.sigmod(self.z3) # final activation function
+    o = self.sigmoid(self.z3) # final activation function
     return o
   
-  def sigmodPrime(self, s): # 激活函数的导数
+  def sigmoidPrime(self, s): # 激活函数的导数
     return s * (1 - s)
 
   # backward propagation 反向传播
@@ -39,6 +39,32 @@ class neural_network(object):
   # 反向传播通过使用损失函数来计算网络与目标输出的距离
   def backward(self, X, y, o):
     # 首先，我们通过计算输出层o 和 实际值y 之间的差值来找到函数中的误差。
+    self.o_error = y - o
+    # 确定输出层的改变量，我们需要通过将输出层的误差与S型函数的导数相乘来计算这个增量
+    self.o_delta = self.o_error * self.sigmoidPrime(o)
+    # 使用第二组权重的转置的原因是为了能够将输出的误差应用到每个权重上
+    self.z2_error = self.o_delta.dot(self.W2.T)
+    # 执行与输出误差相同的操作，将误差乘以 S 型函数的导数，以找出 z2 的变化
+    self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
+    # 通过将输入层与隐藏层的增量输出相乘，我们可以找到第一层的权重的调整量
+    self.W1 += X.T.dot(self.z2_delta)
+    # 通过将隐藏层与输出层的增量输出相乘，我们可以找到第二层的权重的调整量
+    self.W2 += self.z2.T.dot(self.o_delta)
+
+  def train(self, X, y):
+    o = self.forward(X)
+    self.backward(X, y, o)
+
+
+  def predictfunction(self, X_test):
+    print("Predicted data based on trained weights:")
+    print("Input (scaled): \n" + str(X_test))
+    print("Output: \n" + str(self.forward(X_test)))
+
+  def saveWeights(self):
+    np.savetxt("w1.txt", self.W1, fmt="%s")
+    np.savetxt("w2.txt", self.W2, fmt="%s")
+
 
 
 """
