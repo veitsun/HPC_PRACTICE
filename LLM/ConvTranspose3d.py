@@ -5,7 +5,7 @@ import torch
 conv_transpose = nn.ConvTranspose3d(16, 33, 3, stride=2)
 
 # non-square kernels and unequal stride and with padding
-# m = nn.ConvTranspose3d(16, 33, (3, 5, 2), stride=(2, 1, 1), padding=(0, 4, 2))
+m = nn.ConvTranspose3d(16, 33, (3, 5, 2), stride=(2, 1, 1), padding=(0, 4, 2))
 
 # 假设输入的张量形状为 (batch_size=20, channels=16, depth=10, height=50, width=100)
 # 有 20 个样本，每个样本有 16 个通道，每个通道的形状为 10x50x100
