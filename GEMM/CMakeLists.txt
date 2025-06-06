@@ -1,11 +1,6 @@
 set(INCLUDE_DIR_GEMM ${CMAKE_SOURCE_DIR}/GEMM/include)
 list(APPEND INCLUDE_DIR_GEMM ${CMAKE_SOURCE_DIR}/src/include)
 
-# set(CUDA_ARCHITECTURES 90)
-set(CMAKE_CUDA_COMPILER "nvcc")
-
-include_directories(${INCLUDE_DIR})
-
 # 定义宏
 macro(add_multiple_executables)
     foreach(executable_name ${ARGN})
@@ -22,6 +17,3 @@ add_multiple_executables(
   GEMM_native
   GEMM_coalesce
 )
-
-
-

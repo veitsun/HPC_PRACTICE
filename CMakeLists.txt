@@ -1,21 +1,26 @@
 cmake_minimum_required(VERSION 3.23)
 set(CMAKE_CUDA_ARCHITECTURES "native")
-# set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 project(HPC_PRACTICE LANGUAGES CXX CUDA)
 
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 # list(APPEND INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/include)
+set(CUDA_ARCHITECTURES 86) # for RTX 3080ti
+# set(CUDA_ARCHITECTURES 90) # for H100
+# set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+set(CMAKE_CUDA_COMPILER "nvcc")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
 
 
 
 # set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda-12.6/" CACHE PATH "CUDA Toolkit Root Directory")
 # add_compile_options("$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CUDA>>:-G;-src-in-ptx>")
-# 找cublas库
+
+# 查找 CUDA 包
 find_package(CUDA REQUIRED)
+# 找cublas库
 find_library(CUBLAS_LIBRARY NAMES cublas PATHS ${CUDA_TOOLKIT_ROOT_DIR}/lib64 NO_DEFAULT_PATH)
 if (NOT CUBLAS_LIBRARY)
     message(FATAL_ERROR "Could not find cuBLAS library")
@@ -33,14 +38,10 @@ endif()
 #   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas -Wno-unused-private-field")
 # endif()
 
-set(CUDA_ARCHITECTURES 86) # for RTX 3080ti
-# set(CUDA_ARCHITECTURES 90) # for H100
-set(CMAKE_CUDA_COMPILER "nvcc")
 
 add_subdirectory(src)
 add_subdirectory(GEMM)
 add_subdirectory(sunwei_test)
-# add_subdirectory(kernels)
 
 
 # 定义宏
@@ -48,7 +49,7 @@ macro(add_multiple_executables)
     foreach(executable_name ${ARGN})
         add_executable(${executable_name} ${executable_name}.cu)
         target_include_directories(${executable_name} PUBLIC ${INCLUDE_DIR})
-        target_link_libraries(${executable_name} PRIVATE SUNWEI_SRC SUNWEI_Assit ${CUBLAS_LIBRARY})
+        target_link_libraries(${executable_name} PRIVATE SUNWEI_SRC ${CUBLAS_LIBRARY})
         # 设置nvcc编译器参数
         # target_compile_options(${executable_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xptxas -v>)
 

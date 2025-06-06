@@ -8,10 +8,9 @@ set(Hellolib_src ${Hellolib_src_cpp} ${Hellolib_src_cu})
 # 添加头文件内容
 list(APPEND INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/include)
 
-# 查找 CUDA 包
-find_package(CUDA REQUIRED)
 
 add_library(SUNWEI_SRC SHARED  ${Hellolib_src})
+
 # 指定目标的包含目录
 target_include_directories(SUNWEI_SRC
     PUBLIC

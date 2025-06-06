@@ -1,6 +1,3 @@
-# set(CUDA_ARCHITECTURES 90)
-set(CMAKE_CUDA_COMPILER "nvcc")
-
 # 定义宏
 macro(add_multiple_executables)
     foreach(executable_name ${ARGN})
@@ -12,7 +9,6 @@ endmacro()
 
 # 调用宏
 add_multiple_executables(
-  
   cp_async_example
   MulMatrixByCublas
   MulMatrixNative
