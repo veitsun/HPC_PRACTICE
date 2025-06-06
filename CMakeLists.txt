@@ -7,6 +7,8 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+# list(APPEND INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/include)
 
 
 
@@ -35,11 +37,7 @@ set(CUDA_ARCHITECTURES 86) # for RTX 3080ti
 # set(CUDA_ARCHITECTURES 90) # for H100
 set(CMAKE_CUDA_COMPILER "nvcc")
 
-include_directories(${INCLUDE_DIR})
-# include_directories(include)
-# include_directories(kernels)
 add_subdirectory(src)
-add_subdirectory(Assist)
 add_subdirectory(GEMM)
 add_subdirectory(sunwei_test)
 # add_subdirectory(kernels)
@@ -50,7 +48,7 @@ macro(add_multiple_executables)
     foreach(executable_name ${ARGN})
         add_executable(${executable_name} ${executable_name}.cu)
         target_include_directories(${executable_name} PUBLIC ${INCLUDE_DIR})
-        target_link_libraries(${executable_name} PRIVATE SUNWEI_src SUNWEI_Assit ${CUBLAS_LIBRARY})
+        target_link_libraries(${executable_name} PRIVATE SUNWEI_SRC SUNWEI_Assit ${CUBLAS_LIBRARY})
         # 设置nvcc编译器参数
         # target_compile_options(${executable_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xptxas -v>)
 
@@ -60,12 +58,6 @@ endmacro()
 # 调用宏
 add_multiple_executables(
   main
-  MulMatrixByCublas
-  MulMatrixNative
-  MulMatrixOnDevice
-  MulMatrixOnDeviceOptBySharedMem
-  MulMatrixOnDeviceOptBySharedMemAndRegister
-  test
 )
 
 

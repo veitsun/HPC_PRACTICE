@@ -39,31 +39,4 @@ replay: clean config build
 
 play: config build
 
-runmain:
-	@./build/main
-
-runmatrixMul:
-	@./build/matrixMul
-
-runaddNum:
-	@./build/addNum
-
-runMulMatrixByCublas:
-	@./build/MulMatrixByCublas
-
-runMulMatrixOnDevice:
-	@./build/MulMatrixOnDevice
-
-runMulMatrixNative:
-	@./build/MulMatrixNative
-
-runMulMatrixOnDeviceOptBySharedMem:
-	@./build/MulMatrixOnDeviceOptBySharedMem
-
-runMulMatrixOnDeviceOptBySharedMemAndRegister:
-	@./build/MulMatrixOnDeviceOptBySharedMemAndRegister
-
-runtest:
-	@./build/test
-
-.PHONY: all config build clean rebuild
+.PHONY: all config build clean rebuild play
