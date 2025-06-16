@@ -12,11 +12,9 @@ set(CUDA_ARCHITECTURES 86) # for RTX 3080ti
 # set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 set(CMAKE_CUDA_COMPILER "nvcc")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
-
-
-
-# set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda-12.6/" CACHE PATH "CUDA Toolkit Root Directory")
-# add_compile_options("$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CUDA>>:-G;-src-in-ptx>")
+# 设置 pybind11 的包含路径
+set(PYBIND11_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/pybind11/include)
+list(APPEND INCLUDE_DIR ${PYBIND11_INCLUDE_DIR})
 
 # 查找 CUDA 包
 find_package(CUDA REQUIRED)
@@ -28,6 +26,19 @@ else()
     message(STATUS "Found cuBLAS library: ${CUBLAS_LIBRARY}")
 endif()
 
+# 智能查找 Python：优先使用当前激活的环境
+if(DEFINED ENV{CONDA_PREFIX})
+    # 如果在 conda 环境中
+    set(Python_ROOT_DIR $ENV{CONDA_PREFIX})
+    message(STATUS "Detected conda environment: $ENV{CONDA_DEFAULT_ENV}")
+elseif(DEFINED ENV{VIRTUAL_ENV})
+    # 如果在 Python 虚拟环境中
+    set(Python_ROOT_DIR $ENV{VIRTUAL_ENV})
+    message(STATUS "Detected virtual environment: $ENV{VIRTUAL_ENV}")
+endif()
+# 明确查找 Python
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
 # 查找 OpenMP 包
 # find_package(OpenMP REQUIRED)
 # if (${OpenMP_FOUND})
@@ -38,11 +49,15 @@ endif()
 #   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas -Wno-unused-private-field")
 # endif()
 
-
+add_subdirectory(deps/pybind11)
 add_subdirectory(src)
 add_subdirectory(GEMM)
 add_subdirectory(sunwei_test)
 
+
+# 创建我的 python 模块
+pybind11_add_module(my_module sunwei_test/my_module.cpp)
+target_link_libraries(my_module PRIVATE SUNWEI_SRC ${CUBLAS_LIBRARY})
 
 # 定义宏
 macro(add_multiple_executables)
@@ -54,7 +69,7 @@ macro(add_multiple_executables)
         # target_compile_options(${executable_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xptxas -v>)
 
     endforeach()
-endmacro()
+endmacro() 
 
 # 调用宏
 add_multiple_executables(
