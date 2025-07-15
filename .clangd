@@ -1,8 +1,7 @@
 CompileFlags:
   Add: [
   "--cuda-gpu-arch=sm_60", 
-  "-I/usr/lib/gcc/x86_64-linux-gnu/12/include", 
-  "-I/usr/local/cuda-12.6/include",
+  "-I/usr/lib/gcc/x86_64-linux-gnu/12/include",
   ]
 
   Remove: [

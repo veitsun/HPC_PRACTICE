@@ -9,8 +9,8 @@ __global__ void initKernel(float *data, float value, int N) {
   }
 }
 
-void init_two_arrary_mem_by_cpu(float *out_d, float *in_d, const int n,
-                                float valueA, float valueB) {
+void init_two_array_mem_by_cpu(float *out_d, float *in_d, const int n,
+                               float valueA, float valueB) {
   for (int i = 0; i < n; ++i) {
     out_d[i] = valueA;
     in_d[i] = valueB;

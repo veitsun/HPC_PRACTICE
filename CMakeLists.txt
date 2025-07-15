@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-set(CMAKE_CUDA_ARCHITECTURES "native")
+# set(CMAKE_CUDA_ARCHITECTURES "all")
 project(HPC_PRACTICE LANGUAGES CXX CUDA)
 
 set(CMAKE_CUDA_STANDARD 17)
@@ -51,11 +51,11 @@ find_package(Python COMPONENTS Interpreter Development REQUIRED)
 add_subdirectory(deps/pybind11)
 add_subdirectory(src)
 add_subdirectory(GEMM)
-add_subdirectory(sunwei_test)
+add_subdirectory(test)
 
 
 # 创建我的 python 模块
-pybind11_add_module(my_module sunwei_test/my_module.cpp)
+pybind11_add_module(my_module test/my_module.cpp)
 target_link_libraries(my_module PRIVATE LIB_SRC ${CUBLAS_LIBRARY})
 
 # 定义宏
