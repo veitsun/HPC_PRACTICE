@@ -16,6 +16,7 @@ add_multiple_executables(
   MulMatrixOnDeviceOptBySharedMem
   MulMatrixOnDeviceOptBySharedMemAndRegister
   test
+  cuda_graph
 )
 
 

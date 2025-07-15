@@ -1,7 +1,9 @@
 // #include <__clang_cuda_builtin_vars.h>
 // #include <__clang_cuda_builtin_vars.h>
+#include "Timer.cuh"
 #include "utils.cuh"
 #include <cstdint>
+#include <cstdio>
 #include <cuda.h>
 #define N 500000
 
@@ -25,10 +27,12 @@ int main() {
   cudaMalloc(&in_d, N * sizeof(float));
   const int valueA = 0.1;
   const int valueB = 0.5;
-  // 两种初始化形式
-  init_mem_by_cpu(out_d, in_d, N, valueA, valueB); // 方式一，用 CPU 进行初始化
+  // // 两种初始化形式
+  // init_two_arrary_mem_by_cpu(out_d, in_d, N, valueA,
+  //                            valueB); // 方式一，用 CPU 进行初始化
+  startTimer();
 
-  init_mem_by_gpu<<<block_per_grid, thread_per_block>>>(
+  init_two_array_mem_by_gpu<<<block_per_grid, thread_per_block>>>(
       out_d, in_d, N, valueA, valueB); // 方式二，用 GPU 进行初始化
 
   for (int istep = 0; istep < NSTEP; ++istep) {
@@ -36,6 +40,9 @@ int main() {
       shortKernel<<<block_per_grid, thread_per_block>>>(out_d, in_d);
     }
   }
+
+  float times = stopTimer();
+  printf("程序内核所执行的时间 %.4f ms\n", times);
 
   cudaFree(out_d);
   cudaFree(in_d);
