@@ -3,8 +3,8 @@
 #include "CInitialData.h"
 #include "CPrintMatrix.h"
 #include "Num.h"
+#include "Timer.cuh"
 #include "common.h"
-#include "myBase.cuh"
 // #include <__clang_cuda_builtin_vars.h>
 #include <cstdio>
 #include <cstdlib>

@@ -1,8 +1,8 @@
 #include "CInitialData.h"
 #include "CPrintMatrix.h"
 #include "Num.h"
+#include "Timer.cuh"
 #include "common.h"
-#include "myBase.cuh"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

@@ -1,3 +1,24 @@
 CompileFlags:
-  Add: ["--cuda-gpu-arch=sm_60", -I/usr/lib/gcc/x86_64-linux-gnu/12/include]
-  Remove: [-mno-direct-extern-access, -fconserve-stack,"-Xptxas", "-Xcompiler=-fPIC","--options-file","-arch=native","-forward-unknown-to-host-compiler",-fno-allow-store-data-races, -mfunction-return=thunk-extern, -mindirect-branch-cs-prefix, -mindirect-branch-register, -mindirect-branch=thunk-extern, -mskip-rax-setup, -mpreferred-stack-boundary=3, -mno-fp-ret-in-387]
+  Add: [
+  "--cuda-gpu-arch=sm_60", 
+  "-I/usr/lib/gcc/x86_64-linux-gnu/12/include", 
+  "-I/usr/local/cuda-12.6/include",
+  ]
+
+  Remove: [
+  "-mno-direct-extern-access", 
+  "-fconserve-stack",
+  "-Xptxas", 
+  "-Xcompiler=-fPIC",
+  "--options-file",
+  "-arch=native",
+  "-forward-unknown-to-host-compiler",
+  "-fno-allow-store-data-races", 
+  "-mfunction-return=thunk-extern", 
+  "-mindirect-branch-cs-prefix", 
+  "-mindirect-branch-register", 
+  "-mindirect-branch=thunk-extern", 
+  "-mskip-rax-setup", 
+  "-mpreferred-stack-boundary=3", 
+  "-mno-fp-ret-in-387",
+  ]

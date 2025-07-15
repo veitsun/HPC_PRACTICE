@@ -1,20 +1,23 @@
 {
-    "files.autoSave": "onFocusChange",
-    "auto-rename-tag.activationOnLanguage": [
-        "*"
-    ],
-    "gitHistory.includeRemoteBranches": true,
-    "C_Cpp.intelliSenseEngine": "disabled",
-    "clangd.path": "/usr/bin/clangd",
-    "doxdocgen.generic.order": [
-        "brief",
-        "empty",
-        "param",
-        "empty",
-        "return"
-    ],
-    "doxdocgen.generic.includeTypeAtReturn": false,
-    "doxdocgen.generic.briefTemplate": "@brief ${cursor}",
-    "doxdocgen.generic.paramTemplate": "@param{direction}{align:1}  {param}{align:2}  ${cursor}",
-    "doxdocgen.generic.returnTemplate": "@return ${cursor}"
+	"files.autoSave": "onFocusChange",
+	"auto-rename-tag.activationOnLanguage": [
+		"*"
+	],
+	"gitHistory.includeRemoteBranches": true,
+	"C_Cpp.intelliSenseEngine": "disabled",
+	"clangd.path": "/usr/bin/clangd",
+	"doxdocgen.generic.order": [
+		"brief",
+		"empty",
+		"param",
+		"empty",
+		"return"
+	],
+	"doxdocgen.generic.includeTypeAtReturn": false,
+	"doxdocgen.generic.briefTemplate": "@brief ${cursor}",
+	"doxdocgen.generic.paramTemplate": "@param{direction}{align:1}  {param}{align:2}  ${cursor}",
+	"doxdocgen.generic.returnTemplate": "@return ${cursor}",
+	// "editor.tabSize": 4,
+	// "editor.insertSpaces": true,
+	// "editor.formatOnSave": true,
 }

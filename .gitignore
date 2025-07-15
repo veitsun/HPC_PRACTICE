@@ -1,10 +1,5 @@
-fileoutput.txt
-random_numbers.txt
-build
-.cache
-CodeSamples
-data.txt
-__MACOSX
+build/
+.cache/
 data/
 result/
 __pycache__/

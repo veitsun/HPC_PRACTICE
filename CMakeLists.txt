@@ -5,11 +5,10 @@ project(HPC_PRACTICE LANGUAGES CXX CUDA)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
-set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-# list(APPEND INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/include)
+set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/include)
+
 set(CUDA_ARCHITECTURES 86) # for RTX 3080ti
 # set(CUDA_ARCHITECTURES 90) # for H100
-# set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 set(CMAKE_CUDA_COMPILER "nvcc")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
 # 设置 pybind11 的包含路径
@@ -57,23 +56,20 @@ add_subdirectory(sunwei_test)
 
 # 创建我的 python 模块
 pybind11_add_module(my_module sunwei_test/my_module.cpp)
-target_link_libraries(my_module PRIVATE SUNWEI_SRC ${CUBLAS_LIBRARY})
+target_link_libraries(my_module PRIVATE LIB_SRC ${CUBLAS_LIBRARY})
 
 # 定义宏
 macro(add_multiple_executables)
     foreach(executable_name ${ARGN})
         add_executable(${executable_name} ${executable_name}.cu)
         target_include_directories(${executable_name} PUBLIC ${INCLUDE_DIR})
-        target_link_libraries(${executable_name} PRIVATE SUNWEI_SRC ${CUBLAS_LIBRARY})
-        # 设置nvcc编译器参数
-        # target_compile_options(${executable_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xptxas -v>)
-
+        target_link_libraries(${executable_name} PRIVATE LIB_SRC ${CUBLAS_LIBRARY})
     endforeach()
 endmacro() 
 
 # 调用宏
 add_multiple_executables(
-  main
+  gen_num
 )
 
 
