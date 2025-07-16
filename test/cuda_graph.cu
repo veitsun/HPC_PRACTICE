@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cuda.h>
+#include <cuda_runtime.h>
 #define N 500000
 
 __global__ void shortKernel(float *out_d, float *in_d) {

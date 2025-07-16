@@ -2,6 +2,9 @@ CompileFlags:
   Add: [
   "--cuda-gpu-arch=sm_60", 
   "-I/usr/lib/gcc/x86_64-linux-gnu/12/include",
+  "--cuda-path=/usr/local/cuda-12.6",
+  "-x",
+  "cuda",
   ]
 
   Remove: [
@@ -20,4 +23,6 @@ CompileFlags:
   "-mskip-rax-setup", 
   "-mpreferred-stack-boundary=3", 
   "-mno-fp-ret-in-387",
+  "-ccbin=/usr/bin/g++",
+  "--generate-code=*",
   ]
