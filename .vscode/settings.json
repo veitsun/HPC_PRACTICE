@@ -13,12 +13,18 @@
 		"empty",
 		"return"
 	],
+	// 这里设置关于自动生成注释
 	"doxdocgen.generic.includeTypeAtReturn": false,
 	"doxdocgen.generic.briefTemplate": "@brief ${cursor}",
 	"doxdocgen.generic.paramTemplate": "@param{direction}{align:1}  {param}{align:2}  ${cursor}",
 	"doxdocgen.generic.returnTemplate": "@return ${cursor}",
+	// 这里设置关于 editor
 	// "editor.tabSize": 4,
 	// "editor.insertSpaces": true,
 	// "editor.formatOnSave": true,
+	// 这里设置关于 cmake
 	"cmake.cmakePath": "/usr/bin/cmake",
+	"cmake.debugConfig": {
+		"miDebuggerPath": "/usr/local/cuda-12.6/bin/cuda-gdb",
+	},
 }

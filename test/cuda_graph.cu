@@ -36,19 +36,19 @@ int main() {
       out_d, in_d, N, valueA, valueB); // 方式二，用 GPU 进行初始化
 
   cudaDeviceSynchronize();
-  cudaStream_t stream;
-  cudaError_t err = cudaStreamCreate(&stream);
-  if (err != cudaSuccess) {
-    fprintf(stderr, "create stream failed : %s\n", cudaGetErrorString(err));
-  }
+  // cudaStream_t stream;
+  // cudaError_t err = cudaStreamCreate(&stream);
+  // if (err != cudaSuccess) {
+  //   fprintf(stderr, "create stream failed : %s\n", cudaGetErrorString(err));
+  // }
   startTimer();
   for (int istep = 0; istep < NSTEP; ++istep) {
     for (int ikernel = 0; ikernel < NKERNEL; ++ikernel) {
-      shortKernel<<<block_per_grid, thread_per_block, 0, stream>>>(out_d, in_d);
-      cudaStreamSynchronize(stream); // 等待这个流完成
+      shortKernel<<<block_per_grid, thread_per_block, 0>>>(out_d, in_d);
+      // cudaStreamSynchronize(stream); // 等待这个流完成
     }
   }
-  cudaStreamDestroy(stream); // 用完 stream 后销毁
+  // cudaStreamDestroy(stream); // 用完 stream 后销毁
 
   cudaDeviceSynchronize();
 

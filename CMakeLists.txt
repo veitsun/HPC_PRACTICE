@@ -1,22 +1,26 @@
 cmake_minimum_required(VERSION 3.23)
 # set(CMAKE_CUDA_ARCHITECTURES "all")
+set(CMAKE_CUDA_ARCHITECTURES native CACHE STRING "")
 project(HPC_PRACTICE LANGUAGES CXX CUDA)
 
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/include)
-
+set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda-12.6" CACHE PATH "Path to CUDA Toolkit")
 set(CUDA_ARCHITECTURES 86) # for RTX 3080ti
 # set(CUDA_ARCHITECTURES 90) # for H100
-set(CMAKE_CUDA_COMPILER "nvcc")
+# set(CMAKE_CUDA_COMPILER "nvcc")
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.6/bin/nvcc")
+enable_language(CUDA)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xptxas=-v")
 # 设置 pybind11 的包含路径
 set(PYBIND11_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/pybind11/include)
 list(APPEND INCLUDE_DIR ${PYBIND11_INCLUDE_DIR})
 
 # 查找 CUDA 包
-find_package(CUDA REQUIRED)
+# find_package(CUDA REQUIRED)
+find_package(CUDAToolkit REQUIRED)
 # 找cublas库
 find_library(CUBLAS_LIBRARY NAMES cublas PATHS ${CUDA_TOOLKIT_ROOT_DIR}/lib64 NO_DEFAULT_PATH)
 if (NOT CUBLAS_LIBRARY)
@@ -63,7 +67,7 @@ macro(add_multiple_executables)
     foreach(executable_name ${ARGN})
         add_executable(${executable_name} ${executable_name}.cu)
         target_include_directories(${executable_name} PUBLIC ${INCLUDE_DIR})
-        target_link_libraries(${executable_name} PRIVATE LIB_SRC ${CUBLAS_LIBRARY})
+        target_link_libraries(${executable_name} PRIVATE cudart LIB_SRC ${CUBLAS_LIBRARY})
     endforeach()
 endmacro() 
 
