@@ -52,4 +52,4 @@ cmake --build build --target my_app
 
 如果服务器重启了的话， module环境丢失，需要在 bash 用户环境中加上
 
-![alt text](image/env.png)
+![alt text](image/module.png)
