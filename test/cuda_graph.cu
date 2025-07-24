@@ -37,16 +37,38 @@ int main() {
       out_d, in_d, N, valueA, valueB); // 方式二，用 GPU 进行初始化
 
   cudaDeviceSynchronize();
+
   cudaStream_t stream;
   cudaError_t err = cudaStreamCreate(&stream);
   if (err != cudaSuccess) {
     fprintf(stderr, "create stream failed : %s\n", cudaGetErrorString(err));
   }
+
+  bool graphCreated = false;
+  cudaGraph_t graph;         // 定义了 kernel graph 的结构和内容
+  cudaGraphExec_t graphExec; // 这个对象是一个 "可执行的 graph 实例"
+                             // ，可以以类似于单个内核的方式启动和执行
+
   startTimer();
   for (int istep = 0; istep < NSTEP; ++istep) {
-    for (int ikernel = 0; ikernel < NKERNEL; ++ikernel) {
-      shortKernel<<<block_per_grid, thread_per_block, 0, stream>>>(out_d, in_d);
+
+    if (!graphCreated) {
+      cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal);
+
+      for (int ikernel = 0; ikernel < NKERNEL; ++ikernel) {
+        // 循环提交 NKERNEL 次 kernel （此时只是记录操作，并不是真正 GPU 执行）
+        shortKernel<<<block_per_grid, thread_per_block, 0, stream>>>(out_d,
+                                                                     in_d);
+      }
+      cudaStreamEndCapture(stream, &graph);
+      // 必须通过 cudaGraphInstantiate 来实例化一个可执行的
+      // graph，该调用创建并预初始化所有 kernel
+      // 工作描述符，以便它们可以尽可能快地重复启动
+      cudaGraphInstantiate(&graphExec, graph, nullptr, nullptr, 0);
+      graphCreated = true;
     }
+    cudaGraphLaunch(graphExec, stream); // 提交生成的实例以供执行
+    cudaStreamSynchronize(stream);      // 等待这个流完成
   }
   cudaStreamSynchronize(stream); // 等待这个流完成
   cudaStreamDestroy(stream);     // 用完 stream 后销毁

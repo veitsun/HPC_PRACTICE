@@ -3,6 +3,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+// 每次调用 CUDA API 都要检查返回值，至少在开发和调试阶段启用宏
 #define CHECK(call)                                                            \
   {                                                                            \
     const cudaError_t error = call;                                            \
