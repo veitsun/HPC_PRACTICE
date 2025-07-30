@@ -1,14 +1,14 @@
 #pragma once
-#include "AddNumkernel.cuh"
-
 #include <iostream>
+
+#include "AddNumkernel.cuh"
 
 using namespace std;
 
 #define DX 100
 
 class CAddNumkernel {
-public:
+ public:
   int *a;
   int *b;
   int *c;
