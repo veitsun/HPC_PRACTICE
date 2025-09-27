@@ -18,4 +18,5 @@ add_multiple_executables(
   GEMM_cublas
   GEMM_native
   GEMM_coalesce
+  test0927
 )
